@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>イチニチ一歩</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      padding: 20px;
+      background-color: #fff7e6;
+    }
+    h1 {
+      text-align: center;
+      color: white;
+      background-color: orange;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .mood-buttons button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>イチニチ一歩</h1>
+
+  <p>今日の気分は？</p>
+  <div class="mood-buttons">
+    <button onclick="selectMood('幸せ')">幸せ</button>
+    <button onclick="selectMood('疲れ')">疲れ</button>
+    <button onclick="selectMood('やる気満々')">やる気満々</button>
+    <button onclick="selectMood('悲しい')">悲しい</button>
+  </div>
+
+  <p id="selectedMood">気分: 未選択</p>
+
+  <p>今日の日記</p>
+  <textarea id="diaryEntry"></textarea><br />
+
+  <button onclick="saveDiary()">日記を保存</button>
+  <button onclick="showMission()">イチニチ1ミッション</button>
+
+  <script>
+    let selectedMood = "";
+
+    function selectMood(mood) {
+      selectedMood = mood;
+      document.getElementById("selectedMood").innerText = `選んだ気分: ${mood}`;
+    }
+
+    function saveDiary() {
+      const diaryText = document.getElementById("diaryEntry").value.trim();
+      if (!selectedMood) {
+        alert("気分を選んでください。");
+        return;
+      }
+      if (!diaryText) {
+        alert("日記を入力してください。");
+        return;
+      }
+      alert(`保存完了\n気分: ${selectedMood}\n日記: ${diaryText}`);
+    }
+
+    function showMission() {
+      const missions = [
+        ["筋トレミッション", "夜寝る前に腕立て伏せを10回しましょう。"],
+        ["リラックスミッション", "夜寝る前に数分の深呼吸をしましょう。"]
+      ];
+      const random = missions[Math.floor(Math.random() * missions.length)];
+      alert(`${random[0]}\n${random[1]}`);
+    }
+  </script>
+</body>
+</html>
