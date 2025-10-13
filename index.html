@@ -2,130 +2,48 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>イチニチ一歩 - 睡眠記録</title>
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #fff8e7;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      background-color: orange;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-    }
-    button {
-      margin: 5px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #f0f0f0;
-    }
-    input, textarea, select {
-      margin: 5px;
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    canvas {
-      margin-top: 20px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>睡眠記録グラフ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <h2>今週の睡眠記録</h2>
+  <canvas id="sleepChart" width="400" height="200"></canvas>
 
-  <h1>イチニチ一歩（睡眠記録）</h1>
-
-  <h3>🕒 睡眠記録</h3>
-  <label>昨日寝た時間：</label>
-  <input type="time" id="sleepTime"><br>
-
-  <label>今日起きた時間：</label>
-  <input type="time" id="wakeTime"><br>
-
-  <p id="sleepDuration">睡眠時間：--時間</p>
-
-  <h3>😊 今日の気分</h3>
-  <button onclick="setMood('幸せ')">幸せ</button>
-  <button onclick="setMood('疲れ')">疲れ</button>
-  <button onclick="setMood('やる気満々')">やる気満々</button>
-  <button onclick="setMood('悲しい')">悲しい</button>
-  <p>気分：<span id="mood">未選択</span></p>
-
-  <h3>📝 今日の日記</h3>
-  <textarea id="diary" rows="3" cols="30" placeholder="今日の出来事や感想を入力"></textarea><br>
-
-  <button onclick="saveData()">日記を保存</button>
-
-  <canvas id="sleepChart" width="300" height="150"></canvas>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let mood = '';
-    let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
+    const ctx = document.getElementById('sleepChart').getContext('2d');
 
-    function setMood(m) {
-      mood = m;
-      document.getElementById("mood").textContent = m;
-    }
+    // サンプルデータ（例：1週間分の睡眠時間）
+    const sleepHours = [6.5, 7.0, 5.5, 8.0, 7.5, 6.0, 7.8];
+    const days = ['月', '火', '水', '木', '金', '土', '日'];
 
-    function calcSleepDuration() {
-      const sleep = document.getElementById("sleepTime").value;
-      const wake = document.getElementById("wakeTime").value;
-      if (sleep && wake) {
-        const s = new Date(`1970-01-01T${sleep}:00`);
-        let w = new Date(`1970-01-01T${wake}:00`);
-        if (w < s) w.setDate(w.getDate() + 1); // 翌日補正
-        const diffH = ((w - s) / (1000 * 60 * 60)).toFixed(1);
-        document.getElementById("sleepDuration").textContent = `睡眠時間：${diffH}時間`;
-        return diffH;
-      }
-      return null;
-    }
-
-    document.getElementById("sleepTime").addEventListener("change", calcSleepDuration);
-    document.getElementById("wakeTime").addEventListener("change", calcSleepDuration);
-
-    function saveData() {
-      const date = new Date().toLocaleDateString();
-      const diary = document.getElementById("diary").value;
-      const duration = calcSleepDuration();
-
-      if (!duration) {
-        alert("睡眠時間を入力してください");
-        return;
-      }
-
-      const entry = { date, duration, mood, diary };
-      records.push(entry);
-      localStorage.setItem('sleepData', JSON.stringify(records));
-      alert("保存しました！");
-      updateChart();
-    }
-
-    function updateChart() {
-      const ctx = document.getElementById("sleepChart");
-      const labels = records.map(r => r.date);
-      const data = records.map(r => r.duration);
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '睡眠時間（時間）',
-            data: data,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: { y: { beginAtZero: true } }
+    const sleepChart = new Chart(ctx, {
+      type: 'line', // ←ここが折れ線グラフ！
+      data: {
+        labels: days,
+        datasets: [{
+          label: '睡眠時間（時間）',
+          data: sleepHours,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          fill: true, // 背景を塗る（透明の色）
+          tension: 0.3, // 線をなめらかに
+          pointRadius: 5,
+          pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: '睡眠時間（h）' }
+          },
+          x: {
+            title: { display: true, text: '曜日' }
+          }
         }
-      });
-    }
-
-    updateChart();
+      }
+    });
   </script>
 </body>
 </html>
