@@ -45,11 +45,14 @@
 
 <canvas id="sleepChart" width="400" height="300"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js v4 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
 <script>
 let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
 let sleepChart = null;
 
+// 睡眠時間計算
 function calcSleepDuration() {
   const sleep = document.getElementById("sleepTime").value;
   const wake = document.getElementById("wakeTime").value;
@@ -63,6 +66,7 @@ function calcSleepDuration() {
   return diffH;
 }
 
+// 時間を数値化（時 + 分/60）
 function parseTimeToNumber(timeStr) {
   const [h,m] = timeStr.split(':').map(Number);
   return h + m/60;
@@ -71,6 +75,7 @@ function parseTimeToNumber(timeStr) {
 document.getElementById("sleepTime").addEventListener("change", calcSleepDuration);
 document.getElementById("wakeTime").addEventListener("change", calcSleepDuration);
 
+// データ保存
 function saveData() {
   const date = new Date().toLocaleDateString();
   const sleepTime = document.getElementById("sleepTime").value;
@@ -84,7 +89,7 @@ function saveData() {
   updateChart();
 }
 
-// ガントチャート風に横棒で睡眠帯を表示
+// ガントチャート風更新
 function updateChart() {
   const ctx = document.getElementById("sleepChart");
   if (sleepChart) sleepChart.destroy();
@@ -96,7 +101,7 @@ function updateChart() {
       let start = parseTimeToNumber(r.sleepTime);
       let end = parseTimeToNumber(r.wakeTime);
       if (end < start) end += 24; // 翌日対応
-      return { x: start, y: r.date, x2: end }; // Chart.js v4 の floating bar
+      return { x: start, x2: end, y: r.date }; // Chart.js v4 floating bar
     }),
     backgroundColor: 'rgba(0,128,255,0.5)',
   }];
@@ -111,13 +116,9 @@ function updateChart() {
           min: 0,
           max: 24,
           title: { display: true, text: '時間（時）' },
-          ticks: {
-            stepSize: 2
-          }
+          ticks: { stepSize: 2 }
         },
-        y: {
-          title: { display: true, text: '日付' }
-        }
+        y: { title: { display: true, text: '日付' } }
       },
       plugins: {
         tooltip: {
@@ -136,5 +137,6 @@ function updateChart() {
 
 updateChart();
 </script>
+
 </body>
 </html>
