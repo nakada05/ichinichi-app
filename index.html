@@ -3,31 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>睡眠記録グラフ</title>
+  <title>睡眠記録アプリ</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Yu Gothic", sans-serif;
+      background-color: #fffbea;
+      color: #333;
+      text-align: center;
+      margin: 20px;
+    }
+    h1 {
+      background-color: #fdd835;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    input {
+      margin: 5px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #ffb300;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ffa000;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h2>今週の睡眠記録</h2>
+
+  <h1>睡眠記録アプリ</h1>
+  <p>昨日の睡眠時間を記録しよう（h）</p>
+
+  <input type="number" id="sleepInput" placeholder="例：7.5">
+  <button onclick="saveSleep()">記録する</button>
+
   <canvas id="sleepChart" width="400" height="200"></canvas>
 
   <script>
+    // ローカルストレージからデータを取得
+    let sleepData = JSON.parse(localStorage.getItem('sleepData')) || [];
+
     const ctx = document.getElementById('sleepChart').getContext('2d');
 
-    // サンプルデータ（例：1週間分の睡眠時間）
-    const sleepHours = [6.5, 7.0, 5.5, 8.0, 7.5, 6.0, 7.8];
-    const days = ['月', '火', '水', '木', '金', '土', '日'];
-
+    // 折れ線グラフの設定
     const sleepChart = new Chart(ctx, {
-      type: 'line', // ←ここが折れ線グラフ！
+      type: 'line',
       data: {
-        labels: days,
+        labels: sleepData.map((d, i) => `記録${i + 1}`),
         datasets: [{
-          label: '睡眠時間（時間）',
-          data: sleepHours,
+          label: '睡眠時間（h）',
+          data: sleepData,
           borderColor: 'rgba(54, 162, 235, 1)',
           backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          fill: true, // 背景を塗る（透明の色）
-          tension: 0.3, // 線をなめらかに
+          fill: true,
+          tension: 0.3,
           pointRadius: 5,
           pointBackgroundColor: 'rgba(54, 162, 235, 1)'
         }]
@@ -37,13 +79,32 @@
           y: {
             beginAtZero: true,
             title: { display: true, text: '睡眠時間（h）' }
-          },
-          x: {
-            title: { display: true, text: '曜日' }
           }
         }
       }
     });
+
+    // データを追加して保存
+    function saveSleep() {
+      const input = document.getElementById('sleepInput');
+      const value = parseFloat(input.value);
+
+      if (!value || value <= 0) {
+        alert('正しい睡眠時間を入力してください');
+        return;
+      }
+
+      // データを追加
+      sleepData.push(value);
+      localStorage.setItem('sleepData', JSON.stringify(sleepData));
+
+      // グラフ更新
+      sleepChart.data.labels.push(`記録${sleepData.length}`);
+      sleepChart.data.datasets[0].data.push(value);
+      sleepChart.update();
+
+      input.value = '';
+    }
   </script>
 </body>
 </html>
