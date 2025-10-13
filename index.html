@@ -1,48 +1,179 @@
-function updateTimeChart() {
-  const ctx = document.getElementById("sleepChart");
-  if (sleepChart) sleepChart.destroy();
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イチニチ一歩 - 睡眠記録</title>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #fff8e7;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      background-color: orange;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+    }
+    input {
+      margin: 5px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
 
-  const labels = records.map(r => r.date);
-  const sleepTimes = records.map(r => parseTime(r.sleepTime));
-  const wakeTimes = records.map(r => parseTime(r.wakeTime));
+  <h1>イチニチ一歩（睡眠記録）</h1>
 
-  sleepChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: '就寝時間',
-          data: sleepTimes,
-          borderColor: 'blue',
-          backgroundColor: 'rgba(0,0,255,0.2)',
-          tension: 0.2
+  <h3>🕒 睡眠記録</h3>
+  <label>昨日寝た時間：</label>
+  <input type="time" id="sleepTime"><br>
+
+  <label>今日起きた時間：</label>
+  <input type="time" id="wakeTime"><br>
+
+  <p id="sleepDuration">睡眠時間：--時間</p>
+
+  <button onclick="saveData()">保存</button>
+
+  <canvas id="sleepChart" width="400" height="200"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
+    let sleepChart = null;
+
+    // 時間計算
+    function calcSleepDuration() {
+      const sleep = document.getElementById("sleepTime").value;
+      const wake = document.getElementById("wakeTime").value;
+      if (sleep && wake) {
+        const s = new Date(`1970-01-01T${sleep}:00`);
+        let w = new Date(`1970-01-01T${wake}:00`);
+        if (w < s) w.setDate(w.getDate() + 1); // 翌日補正
+        const diffH = ((w - s) / (1000 * 60 * 60)).toFixed(1);
+        document.getElementById("sleepDuration").textContent = `睡眠時間：${diffH}時間`;
+        return diffH;
+      }
+      return null;
+    }
+
+    document.getElementById("sleepTime").addEventListener("change", calcSleepDuration);
+    document.getElementById("wakeTime").addEventListener("change", calcSleepDuration);
+
+    // 保存
+    function saveData() {
+      const date = new Date().toLocaleDateString();
+      const sleepTime = document.getElementById("sleepTime").value;
+      const wakeTime = document.getElementById("wakeTime").value;
+      const duration = calcSleepDuration();
+
+      if (!duration) {
+        alert("睡眠時間を入力してください");
+        return;
+      }
+
+      const entry = { date, sleepTime, wakeTime, duration };
+      records.push(entry);
+      localStorage.setItem('sleepData', JSON.stringify(records));
+      alert("保存しました！");
+      updateChart();
+    }
+
+    // 時間を数値化（時＋分/60）
+    function parseTime(timeStr) {
+      const [h,m] = timeStr.split(':').map(Number);
+      return h + m/60;
+    }
+
+    // グラフ更新
+    function updateChart() {
+      const ctx = document.getElementById("sleepChart");
+      if (sleepChart) sleepChart.destroy();
+
+      const labels = records.map(r => r.date);
+      const sleepTimes = records.map(r => parseTime(r.sleepTime));
+      const wakeTimes = records.map(r => parseTime(r.wakeTime));
+      const durations = records.map(r => r.duration);
+
+      sleepChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '就寝時間',
+              data: sleepTimes,
+              borderColor: 'blue',
+              backgroundColor: 'rgba(0,0,255,0.2)',
+              tension: 0.2,
+              fill: false
+            },
+            {
+              label: '起床時間',
+              data: wakeTimes,
+              borderColor: 'orange',
+              backgroundColor: 'rgba(255,165,0,0.2)',
+              tension: 0.2,
+              fill: false
+            },
+            {
+              label: '睡眠時間',
+              data: durations,
+              borderColor: 'green',
+              backgroundColor: 'rgba(0,255,0,0.2)',
+              tension: 0.2,
+              fill: false,
+              yAxisID: 'y2'
+            }
+          ]
         },
-        {
-          label: '起床時間',
-          data: wakeTimes,
-          borderColor: 'orange',
-          backgroundColor: 'rgba(255,165,0,0.2)',
-          tension: 0.2
-        }
-      ]
-    },
-    options: {
-      scales: {
-        y: {
-          min: 0,
-          max: 24,
-          title: { display: true, text: '時間（時）' },
-          ticks: {
-            callback: val => `${Math.floor(val)}:${('0'+Math.round((val%1)*60)).slice(-2)}`
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          stacked: false,
+          scales: {
+            y: {
+              type: 'linear',
+              min: 0,
+              max: 24,
+              position: 'left',
+              title: { display: true, text: '時刻（時）' },
+              ticks: {
+                callback: val => {
+                  const h = Math.floor(val);
+                  const m = Math.round((val % 1) * 60);
+                  return `${h}:${('0'+m).slice(-2)}`;
+                }
+              }
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              min: 0,
+              max: 12,
+              title: { display: true, text: '睡眠時間（時間）' },
+              grid: { drawOnChartArea: false }
+            }
           }
         }
-      }
+      });
     }
-  });
-}
 
-function parseTime(timeStr) {
-  const [h,m] = timeStr.split(':').map(Number);
-  return h + m/60;
-}
+    updateChart();
+  </script>
+</body>
+</html>
