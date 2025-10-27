@@ -8,33 +8,52 @@
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #fff8e7;
       text-align: center;
-      padding: 20px;
+      padding: 25px;
+      font-size: 18px;
+      line-height: 1.6;
     }
     h1 {
       background-color: orange;
       color: white;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 28px;
+    }
+    h3 {
+      font-size: 22px;
+      margin-top: 25px;
+      color: #333;
     }
     button {
-      margin: 5px;
-      padding: 8px 16px;
+      margin: 7px;
+      padding: 10px 22px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       background-color: #f0f0f0;
+      font-size: 18px;
       cursor: pointer;
+      transition: 0.2s;
     }
     button:hover {
-      background-color: #ffe4b2;
+      background-color: #ffd699;
     }
     input, textarea, select {
-      margin: 5px;
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      margin: 7px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      font-size: 18px;
+    }
+    textarea {
+      width: 80%;
+    }
+    p {
+      font-size: 18px;
+      color: #333;
     }
     canvas {
-      margin-top: 20px;
+      margin-top: 25px;
+      max-width: 90%;
     }
   </style>
 </head>
@@ -66,11 +85,11 @@
   <p>気分：<span id="mood">未選択</span></p>
 
   <h3>📝 今日の日記</h3>
-  <textarea id="diary" rows="3" cols="30" placeholder="今日の出来事や感想を入力"></textarea><br>
+  <textarea id="diary" rows="4" placeholder="今日の出来事や感想を入力"></textarea><br>
 
   <button onclick="saveData()">日記を保存</button>
 
-  <canvas id="sleepChart" width="300" height="150"></canvas>
+  <canvas id="sleepChart" width="400" height="200"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -140,7 +159,8 @@
           }]
         },
         options: {
-          scales: { y: { beginAtZero: true } }
+          scales: { y: { beginAtZero: true } },
+          plugins: { legend: { labels: { font: { size: 16 } } } }
         }
       });
     }
