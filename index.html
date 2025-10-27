@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -147,15 +147,19 @@
       const data = records.map(r => r.duration);
 
       new Chart(ctx, {
-        type: 'bar',
+        type: 'line', // ← 折れ線グラフに変更
         data: {
           labels: labels,
           datasets: [{
             label: '睡眠時間（時間）',
             data: data,
-            backgroundColor: '#ffcc80',
-            borderColor: '#ffb74d',
-            borderWidth: 1
+            borderColor: '#ff9800',
+            backgroundColor: '#ffe0b2',
+            borderWidth: 3,
+            tension: 0.3, // 線を少し滑らかに
+            fill: false,
+            pointBackgroundColor: '#ff9800',
+            pointRadius: 6
           }]
         },
         options: {
