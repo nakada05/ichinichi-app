@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>睡眠記録アプリ（折れ線グラフ＋文字大）</title>
+  <title>イチニチ一歩（睡眠記録）</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -11,44 +11,42 @@
       margin: 40px;
       background-color: #fff8e7;
       text-align: center;
-      font-size: 22px;
+      font-size: 18px;
     }
     h1 {
-      font-size: 36px;
-      color: #333;
-      margin-bottom: 20px;
-      background-color: orange;
+      font-size: 28px;
       color: white;
+      background-color: orange;
       padding: 10px;
       border-radius: 10px;
     }
     label {
-      font-size: 24px;
+      font-size: 20px;
     }
     input, select, textarea {
-      font-size: 20px;
-      padding: 8px;
-      margin: 6px;
+      font-size: 16px;
+      padding: 6px;
+      margin: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
     button {
-      font-size: 22px;
-      padding: 10px 24px;
+      font-size: 18px;
+      padding: 8px 18px;
       background-color: #4a90e2;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 8px;
     }
     button:hover {
       background-color: #357ab8;
     }
     #chart-container {
       width: 90%;
-      max-width: 900px;
-      margin: 40px auto;
+      max-width: 800px;
+      margin: 30px auto;
     }
   </style>
 </head>
@@ -147,19 +145,19 @@
             data: data,
             borderColor: '#4a90e2',
             backgroundColor: 'rgba(74,144,226,0.3)',
-            borderWidth: 3,
+            borderWidth: 2,
             fill: true,
             tension: 0.3,
-            pointRadius: 6,
+            pointRadius: 5,
             pointBackgroundColor: '#4a90e2'
           }]
         },
         options: {
           scales: {
-            y: { beginAtZero: true, title: { display: true, text: '時間', font: { size: 20 } }, ticks: { font: { size: 18 } } },
-            x: { title: { display: true, text: '日付', font: { size: 20 } }, ticks: { font: { size: 18 } } }
+            y: { beginAtZero: true, title: { display: true, text: '時間', font: { size: 16 } }, ticks: { font: { size: 14 } } },
+            x: { title: { display: true, text: '日付', font: { size: 16 } }, ticks: { font: { size: 14 } } }
           },
-          plugins: { legend: { labels: { font: { size: 20 } } } }
+          plugins: { legend: { labels: { font: { size: 16 } } } }
         }
       });
     }
