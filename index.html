@@ -22,6 +22,10 @@
       border: none;
       border-radius: 8px;
       background-color: #f0f0f0;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ffe4b2;
     }
     input, textarea, select {
       margin: 5px;
@@ -47,6 +51,13 @@
 
   <p id="sleepDuration">睡眠時間：--時間</p>
 
+  <h3>🌙 睡眠前の行動</h3>
+  <button onclick="setAction('スマホを見た')">スマホを見た</button>
+  <button onclick="setAction('読書した')">読書した</button>
+  <button onclick="setAction('ストレッチした')">ストレッチした</button>
+  <button onclick="setAction('何もしなかった')">何もしなかった</button>
+  <p>行動：<span id="action">未選択</span></p>
+
   <h3>😊 今日の気分</h3>
   <button onclick="setMood('幸せ')">幸せ</button>
   <button onclick="setMood('疲れ')">疲れ</button>
@@ -64,11 +75,17 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let mood = '';
+    let action = '';
     let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
 
     function setMood(m) {
       mood = m;
       document.getElementById("mood").textContent = m;
+    }
+
+    function setAction(a) {
+      action = a;
+      document.getElementById("action").textContent = a;
     }
 
     function calcSleepDuration() {
@@ -98,7 +115,7 @@
         return;
       }
 
-      const entry = { date, duration, mood, diary };
+      const entry = { date, duration, mood, action, diary };
       records.push(entry);
       localStorage.setItem('sleepData', JSON.stringify(records));
       alert("保存しました！");
@@ -109,6 +126,7 @@
       const ctx = document.getElementById("sleepChart");
       const labels = records.map(r => r.date);
       const data = records.map(r => r.duration);
+
       new Chart(ctx, {
         type: 'bar',
         data: {
@@ -116,6 +134,8 @@
           datasets: [{
             label: '睡眠時間（時間）',
             data: data,
+            backgroundColor: '#ffcc80',
+            borderColor: '#ffb74d',
             borderWidth: 1
           }]
         },
