@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>グラフ</title>
+<head><meta charset="UTF-8"><title>グラフ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>body{padding:20px;font-family:sans-serif;}canvas{max-width:100%;}</style>
 </head>
 <body>
-  <h1>📊 グラフ</h1>
-  <p>あとで開発する予定</p>
-  <a href="index.html">ホームへ戻る</a>
-</body>
-</html>
+<h1>勤務時間グラフ</h1>
+<canvas id="graph"></canvas>
+<script>
+const rec=JSON.parse(localStorage.getItem('records')||'[]');
+const labels=rec.map(r=>r.date);
+const hours=rec.map(r=>{
+const [h,m]=r.work.split(':'); return Number(h)+Number(m)/60;
+});
+new Chart(document.getElementById('graph'),{
+type:'bar',
+data:{labels,datasets:[{label:'勤務時間(h)',data:hours}]}
+});
+</script>
+</body></html>
