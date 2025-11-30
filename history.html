@@ -3,80 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <title>睡眠履歴</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #fff8e7;
-      padding: 20px;
-      font-size: 18px;
-    }
-
-    h1 {
-      background-color: orange;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #ffe0b2;
-      font-size: 18px;
-    }
-
-    tr:nth-child(even) {
-      background-color: #fff5e6;
-    }
+    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:18px}
+    h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
+    table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border-radius:8px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid #eee;text-align:center;font-size:14px}
+    th{background:#ffeccf;font-weight:700}
+    .btn{padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
+    .edit{background:#fff;color:#5A67D8;border:2px solid #d6d8ff}
+    .del{background:#fff;color:#d9534f;border:2px solid #f7cfcf}
+    .small{font-size:13px;color:#666}
+    .top-link{display:block;margin-top:12px;text-decoration:none;color:#444}
   </style>
 </head>
 <body>
-
   <h1>睡眠履歴</h1>
+  <a class="top-link" href="index.html">← ホーム</a>
 
   <table>
     <thead>
       <tr>
         <th>日付</th>
         <th>睡眠時間</th>
+        <th>就寝</th>
+        <th>起床</th>
         <th>行動</th>
         <th>気分</th>
         <th>日記</th>
+        <th>操作</th>
       </tr>
     </thead>
-    <tbody id="tableBody"></tbody>
+    <tbody id="tbody"></tbody>
   </table>
 
   <script>
-    const records = JSON.parse(localStorage.getItem("sleepData") || "[]");
+    function loadRecords() {
+      return JSON.parse(localStorage.getItem('sleepData') || '[]');
+    }
 
-    const tbody = document.getElementById("tableBody");
+    function saveRecords(r) {
+      localStorage.setItem('sleepData', JSON.stringify(r));
+    }
 
-    records.forEach(r => {
-      const row = `
-        <tr>
+    function render() {
+      const rows = loadRecords();
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="8" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        const diaryShort = r.diary ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary) : '';
+        tr.innerHTML = `
           <td>${r.date}</td>
-          <td>${r.duration}時間</td>
-          <td>${r.action || "ー"}</td>
-          <td>${r.mood || "ー"}</td>
-          <td>${r.diary || "ー"}</td>
-        </tr>
-      `;
-      tbody.innerHTML += row;
-    });
-  </script>
+          <td>${Number(r.duration).toFixed(1)}時間</td>
+          <td>${r.sleepTime}</td>
+          <td>${r.wakeTime}</td>
+          <td>${r.action || 'ー'}</td>
+          <td>${r.mood || 'ー'}</td>
+          <td title="${r.diary || ''}">${diaryShort}</td>
+          <td>
+            <button class="btn edit" onclick="editRecord(${i})">編集</button>
+            <button class="btn del" onclick="deleteRecord(${i})">削除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
+    function editRecord(i) {
+      window.location.href = `record.html?edit=${i}`;
+    }
+
+    function deleteRecord(i) {
+      if (!confirm('本当に削除しますか？')) return;
+      const r = loadRecords();
+      r.splice(i,1);
+      saveRecords(r);
+      render();
+    }
+
+    // 初回レンダリング
+    render();
+  </script>
 </body>
 </html>
