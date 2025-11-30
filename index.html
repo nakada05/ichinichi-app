@@ -2,112 +2,121 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>イチニチ一歩 - ホーム</title>
-  <style>
-    body {<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>イチニチ一歩 - ホーム</title>
-
+  <title>勤怠履歴</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #fff8e7;
-      text-align: center;
-      padding: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 20px;
+      background: #f8f8f8;
     }
 
     h1 {
-      background-color: orange;
-      color: white;
-      padding: 15px;
-      border-radius: 12px;
-      font-size: 30px;
-      margin-bottom: 30px;
+      font-size: 22px;
     }
 
-    .menu {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 300px;
-      margin: auto;
+    .filter-area {
+      margin-bottom: 20px;
     }
 
-    a {
-      text-decoration: none;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
     }
 
-    .btn {
-      padding: 18px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      border: 2px solid orange;
-      font-size: 20px;
+    th, td {
+      border-bottom: 1px solid #eee;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f0f0ff;
       font-weight: bold;
-      color: #333;
-      transition: 0.2s;
     }
 
-    .btn:hover {
-      background-color: #ffe0b2;
-      border-color: #ff9800;
+    tr:last-child td {
+      border-bottom: none;
     }
 
-    footer {
-      margin-top: 50px;
-      font-size: 15px;
-      color: #555;
+    .edit-btn {
+      cursor: pointer;
+      color: #5A67D8;
+      font-size: 18px;
     }
   </style>
-
 </head>
 <body>
 
-  <h1>イチニチ一歩</h1>
+  <h1>勤怠履歴</h1>
 
-  <div class="menu">
-    <a href="record.html"><div class="btn">🌙 睡眠を記録する</div></a>
-    <a href="history.html"><div class="btn">📄 睡眠履歴を見る</div></a>
-    <a href="graph.html"><div class="btn">📊 グラフを見る</div></a>
+  <div class="filter-area">
+    <label>年月を選択：</label>
+    <input type="month" id="monthPicker" value="2025-11">
   </div>
 
-  <footer>
-    卒業研究：睡眠改善アプリ  
-  </footer>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>日付</th>
+        <th>出勤</th>
+        <th>退勤</th>
+        <th>勤務時間</th>
+        <th>休憩時間</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- JavaScriptで挿入 -->
+    </tbody>
+  </table>
 
-</body>
-</html>
+<script>
+// 表示データ（後で DB などに置き換え可能）
+const data = [
+  { date: "1(土)", start: "10:58", end: "15:11", work: "04:13", rest: "" },
+  { date: "3(月)", start: "09:26", end: "14:44", work: "05:18", rest: "" },
+  { date: "7(金)", start: "10:01", end: "14:31", work: "04:30", rest: "" },
+  { date: "9(日)", start: "09:26", end: "13:19", work: "03:53", rest: "" },
+  { date: "16(日)", start: "08:27", end: "16:19", work: "06:52", rest: "60分" },
+  { date: "19(水)", start: "09:59", end: "15:16", work: "05:17", rest: "" },
+  { date: "20(木)", start: "09:59", end: "14:51", work: "04:52", rest: "" },
+  { date: "22(土)", start: "09:28", end: "14:31", work: "05:03", rest: "" },
+  { date: "23(日)", start: "09:26", end: "15:00", work: "05:34", rest: "" },
+  { date: "27(木)", start: "09:57", end: "14:33", work: "04:36", rest: "" },
+  { date: "28(金)", start: "09:26", end: "15:07", work: "05:41", rest: "" },
+  { date: "29(土)", start: "09:26", end: "15:00", work: "05:34", rest: "" },
+  { date: "30(日)", start: "08:30", end: "15:42", work: "06:12", rest: "60分" },
+];
 
-      color: white;
-      padding: 16px;
-      border-radius: 12px;
-    }
-    a {
-      display: block;
-      margin: 20px auto;
-      padding: 15px 20px;
-      background-color: #ffd699;
-      border-radius: 12px;
-      width: 60%;
-      font-size: 22px;
-      text-decoration: none;
-      color: #333;
-      font-weight: bold;
-    }
-    a:hover {
-      background-color: #ffb84d;
-    }
-  </style>
-</head>
-<body>
+function renderTable() {
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
 
-  <h1>イチニチ一歩（ホーム）</h1>
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="edit-btn">✏️</td>
+      <td>${row.date}</td>
+      <td>${row.start}</td>
+      <td>${row.end}</td>
+      <td>${row.work}</td>
+      <td>${row.rest}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-  <a href="record.html">📝 睡眠を記録する</a>
-  <a href="history.html">📅 睡眠履歴を見る</a>
-  <a href="graph.html">📊 グラフを見る</a>
+document.getElementById("monthPicker").addEventListener("change", () => {
+  alert("月変更の処理をここで行う（DB連携時）");
+});
+
+renderTable();
+</script>
 
 </body>
 </html>
