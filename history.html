@@ -1,82 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>睡眠履歴</title>
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #fff8e7;
-      padding: 20px;
-      font-size: 18px;
-    }
-
-    h1 {
-      background-color: orange;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #ffe0b2;
-      font-size: 18px;
-    }
-
-    tr:nth-child(even) {
-      background-color: #fff5e6;
-    }
-  </style>
+<head><meta charset="UTF-8"><title>履歴</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>body{font-family:sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:8px;text-align:center;}</style>
 </head>
 <body>
-
-  <h1>睡眠履歴</h1>
-
-  <table>
-    <thead>
-      <tr>
-        <th>日付</th>
-        <th>睡眠時間</th>
-        <th>行動</th>
-        <th>気分</th>
-        <th>日記</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <script>
-    const records = JSON.parse(localStorage.getItem("sleepData") || "[]");
-
-    const tbody = document.getElementById("tableBody");
-
-    records.forEach(r => {
-      const row = `
-        <tr>
-          <td>${r.date}</td>
-          <td>${r.duration}時間</td>
-          <td>${r.action || "ー"}</td>
-          <td>${r.mood || "ー"}</td>
-          <td>${r.diary || "ー"}</td>
-        </tr>
-      `;
-      tbody.innerHTML += row;
-    });
-  </script>
-
-</body>
-</html>
+<h1>勤怠履歴</h1>
+<table><thead><tr><th>日付</th><th>出勤</th><th>退勤</th><th>勤務時間</th><th>休憩</th></tr></thead>
+<tbody id="tb"></tbody></table>
+<script>
+const rec2=JSON.parse(localStorage.getItem('records')||'[]');
+const tb=document.getElementById('tb');
+rec2.forEach(r=>{
+const tr=document.createElement('tr');
+tr.innerHTML=`<td>${r.date}</td><td>${r.start}</td><td>${r.end}</td><td>${r.work}</td><td>${r.rest}</td>`;
+tb.appendChild(tr);
+});
+</script>
+</body></html>
