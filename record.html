@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>イチニチ一歩 - 睡眠記録</title>
+
   <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
@@ -12,19 +13,33 @@
       font-size: 18px;
       line-height: 1.6;
     }
+
     h1 {
       background-color: orange;
       color: white;
       padding: 14px;
       border-radius: 12px;
       font-size: 28px;
+      margin-bottom: 25px;
     }
+
     h3 {
       font-size: 22px;
-      margin-top: 25px;
-      color: #333;
+      margin-top: 30px;
+      color: #444;
     }
-    button {
+
+    input, textarea {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      font-size: 18px;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    button.select-btn {
       margin: 7px;
       padding: 10px 22px;
       border: none;
@@ -34,86 +49,101 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    button:hover {
-      background-color: #ffd699;
+
+    /* 選択されているボタンを強調 */
+    .active {
+      background-color: #ffcc80 !important;
+      border: 2px solid orange !important;
+      font-weight: bold;
     }
-    input, textarea, select {
-      margin: 7px;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #bbb;
-      font-size: 18px;
-    }
-    textarea {
-      width: 80%;
-    }
-    p {
-      font-size: 18px;
-      color: #333;
-    }
-    canvas {
+
+    button#saveBtn {
+      background-color: orange;
+      color: white;
+      padding: 12px 30px;
+      font-size: 20px;
+      border-radius: 12px;
+      border: none;
       margin-top: 25px;
-      max-width: 90%;
     }
+
+    button#saveBtn:hover {
+      background-color: #ff9800;
+    }
+
+    #sleepDuration {
+      font-size: 20px;
+      color: #333;
+      margin-top: 15px;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 40px;
+      font-size: 18px;
+      text-decoration: none;
+      color: #444;
+    }
+
   </style>
 </head>
 <body>
 
-  <h1>イチニチ一歩（睡眠記録）</h1>
+  <h1>睡眠を記録する</h1>
 
+  <!-- 睡眠時間 -->
   <h3>🕒 睡眠記録</h3>
-  <label>昨日寝た時間：</label>
+  <label>昨日寝た時間：</label><br>
   <input type="time" id="sleepTime"><br>
 
-  <label>今日起きた時間：</label>
+  <label>今日起きた時間：</label><br>
   <input type="time" id="wakeTime"><br>
 
   <p id="sleepDuration">睡眠時間：--時間</p>
 
+  <!-- 睡眠前行動 -->
   <h3>🌙 睡眠前の行動</h3>
-  <button onclick="setAction('スマホを見た')">スマホを見た</button>
-  <button onclick="setAction('読書した')">読書した</button>
-  <button onclick="setAction('ストレッチした')">ストレッチした</button>
-  <button onclick="setAction('何もしなかった')">何もしなかった</button>
+  <div id="actionButtons">
+    <button class="select-btn" onclick="setAction(this,'スマホを見た')">スマホを見た</button>
+    <button class="select-btn" onclick="setAction(this,'読書した')">読書した</button>
+    <button class="select-btn" onclick="setAction(this,'ストレッチした')">ストレッチした</button>
+    <button class="select-btn" onclick="setAction(this,'何もしなかった')">何もしなかった</button>
+  </div>
   <p>行動：<span id="action">未選択</span></p>
 
+  <!-- 気分 -->
   <h3>😊 今日の気分</h3>
-  <button onclick="setMood('幸せ')">幸せ</button>
-  <button onclick="setMood('疲れ')">疲れ</button>
-  <button onclick="setMood('やる気満々')">やる気満々</button>
-  <button onclick="setMood('悲しい')">悲しい</button>
+  <div id="moodButtons">
+    <button class="select-btn" onclick="setMood(this,'幸せ')">幸せ</button>
+    <button class="select-btn" onclick="setMood(this,'疲れ')">疲れ</button>
+    <button class="select-btn" onclick="setMood(this,'やる気満々')">やる気満々</button>
+    <button class="select-btn" onclick="setMood(this,'悲しい')">悲しい</button>
+  </div>
   <p>気分：<span id="mood">未選択</span></p>
 
+  <!-- 日記 -->
   <h3>📝 今日の日記</h3>
   <textarea id="diary" rows="4" placeholder="今日の出来事や感想を入力"></textarea><br>
 
-  <button onclick="saveData()">日記を保存</button>
+  <button id="saveBtn" onclick="saveData()">記録を保存</button>
 
-  <canvas id="sleepChart" width="400" height="200"></canvas>
+  <a href="index.html" class="back-link">← ホームへ戻る</a>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let mood = '';
     let action = '';
     let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
 
-    function setMood(m) {
-      mood = m;
-      document.getElementById("mood").textContent = m;
-    }
-
-    function setAction(a) {
-      action = a;
-      document.getElementById("action").textContent = a;
-    }
-
+    // ---- 睡眠時間計算 ----
     function calcSleepDuration() {
       const sleep = document.getElementById("sleepTime").value;
       const wake = document.getElementById("wakeTime").value;
+
       if (sleep && wake) {
         const s = new Date(`1970-01-01T${sleep}:00`);
         let w = new Date(`1970-01-01T${wake}:00`);
         if (w < s) w.setDate(w.getDate() + 1);
+
         const diffH = ((w - s) / (1000 * 60 * 60)).toFixed(1);
         document.getElementById("sleepDuration").textContent = `睡眠時間：${diffH}時間`;
         return diffH;
@@ -124,6 +154,25 @@
     document.getElementById("sleepTime").addEventListener("change", calcSleepDuration);
     document.getElementById("wakeTime").addEventListener("change", calcSleepDuration);
 
+    // ---- ボタン選択UI ----
+    function activateButton(btn, groupId) {
+      document.querySelectorAll(`#${groupId} .select-btn`).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function setAction(btn, a) {
+      action = a;
+      document.getElementById("action").textContent = a;
+      activateButton(btn, 'actionButtons');
+    }
+
+    function setMood(btn, m) {
+      mood = m;
+      document.getElementById("mood").textContent = m;
+      activateButton(btn, 'moodButtons');
+    }
+
+    // ---- 保存 ----
     function saveData() {
       const date = new Date().toLocaleDateString();
       const diary = document.getElementById("diary").value;
@@ -137,39 +186,13 @@
       const entry = { date, duration, mood, action, diary };
       records.push(entry);
       localStorage.setItem('sleepData', JSON.stringify(records));
+
       alert("保存しました！");
-      updateChart();
+
+      // 保存後クリア
+      document.getElementById("diary").value = "";
     }
 
-    function updateChart() {
-      const ctx = document.getElementById("sleepChart");
-      const labels = records.map(r => r.date);
-      const data = records.map(r => r.duration);
-
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '睡眠時間（時間）',
-            data: data,
-            borderColor: '#ff9800',
-            backgroundColor: '#ffe0b2',
-            borderWidth: 3,
-            tension: 0.3,
-            fill: false,
-            pointBackgroundColor: '#ff9800',
-            pointRadius: 6
-          }]
-        },
-        options: {
-          scales: { y: { beginAtZero: true } },
-          plugins: { legend: { labels: { font: { size: 16 } } } }
-        }
-      });
-    }
-
-    updateChart();
   </script>
 </body>
 </html>
