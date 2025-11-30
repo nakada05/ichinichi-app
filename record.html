@@ -53,21 +53,19 @@
     <button id="saveBtn" onclick="saveData()">保存</button>
   </div>
 
-  <a class="back" href="history.html">← 履歴に戻る</a>
+  <!-- 表示文だけ「ホームに戻る」に変更、リンク先は履歴ページのまま -->
+  <a class="back" href="history.html">← ホームに戻る</a>
 
   <script>
-    // --- ユーティリティ ---
     const $ = id => document.getElementById(id);
     let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
 
-    // --- 初期値（日付を今日に設定） ---
     function setTodayDate() {
       const today = new Date().toISOString().slice(0,10);
       if (!$('dateInput').value) $('dateInput').value = today;
     }
     setTodayDate();
 
-    // --- 時間差計算（時間を小数で返す） ---
     function calcSleepDurationVal() {
       const sleep = $('sleepTime').value;
       const wake = $('wakeTime').value;
@@ -88,7 +86,6 @@
     $('sleepTime').addEventListener('change', updateDurationText);
     $('wakeTime').addEventListener('change', updateDurationText);
 
-    // --- 選択ボタン処理 ---
     function activateButton(btn, groupId) {
       document.querySelectorAll(`#${groupId} .select-btn`).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -107,12 +104,10 @@
       activateButton(btn, 'moodButtons');
     }
 
-    // --- 編集モードチェック ---
     const params = new URLSearchParams(window.location.search);
     const editIndex = params.has('edit') ? Number(params.get('edit')) : null;
 
     if (editIndex !== null && Number.isInteger(editIndex) && records[editIndex]) {
-      // 編集モード：フォームに値をセット
       const e = records[editIndex];
       $('dateInput').value = e.date || '';
       $('sleepTime').value = e.sleepTime || '';
@@ -120,7 +115,6 @@
       $('diary').value = e.diary || '';
       if (e.action) {
         currentAction = e.action;
-        // 選択ボタンをハイライト
         document.querySelectorAll('#actionButtons .select-btn').forEach(b => {
           if (b.textContent === e.action) b.classList.add('active');
         });
@@ -135,7 +129,6 @@
       $('saveBtn').textContent = '更新して保存';
     }
 
-    // --- 保存（新規 or 更新） ---
     function saveData() {
       const date = $('dateInput').value;
       const sleepTime = $('sleepTime').value;
@@ -152,21 +145,20 @@
         date,
         sleepTime,
         wakeTime,
-        duration,      // 数値（時間）
+        duration,
         action: currentAction || '',
         mood: currentMood || '',
         diary: diary || ''
       };
 
       if (editIndex !== null && records[editIndex]) {
-        records[editIndex] = entry; // 更新
+        records[editIndex] = entry;
       } else {
-        records.push(entry); // 追加
+        records.push(entry);
       }
 
       localStorage.setItem('sleepData', JSON.stringify(records));
       alert(editIndex !== null ? '更新しました！' : '保存しました！');
-      // 保存後は履歴ページに戻る
       window.location.href = 'history.html';
     }
   </script>
