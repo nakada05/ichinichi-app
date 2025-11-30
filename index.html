@@ -1,38 +1,75 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><title>出勤・退勤</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>body{font-family:sans-serif;padding:20px;}button{padding:10px 20px;margin:10px;font-size:18px;}</style>
+  <meta charset="UTF-8">
+  <title>イチニチ一歩 - ホーム</title>
+
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #fff8e7;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      background-color: orange;
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 30px;
+      margin-bottom: 30px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 300px;
+      margin: auto;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .btn {
+      padding: 18px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 2px solid orange;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #ffe0b2;
+      border-color: #ff9800;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 15px;
+      color: #555;
+    }
+  </style>
+
 </head>
 <body>
-<h1>勤怠打刻</h1>
-<button id="startBtn">出勤</button>
-<button id="endBtn">退勤</button>
-<script>
-function save(key,val){localStorage.setItem(key,val);}
-function load(k){return localStorage.getItem(k);}
 
+  <h1>イチニチ一歩</h1>
 
-document.getElementById("startBtn").onclick=()=>{
-const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-save('start',t); alert("出勤: "+t);
-};
+  <div class="menu">
+    <a href="record.html"><div class="btn">🌙 睡眠記録</div></a>
+    <a href="history.html"><div class="btn">📄 睡眠履歴</div></a>
+    <a href="graph.html"><div class="btn">📊 グラフ</div></a>
+  </div>
 
+  <footer>
+    卒業研究：睡眠改善アプリ  
+  </footer>
 
-document.getElementById("endBtn").onclick=()=>{
-const end=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-const start=load('start'); if(!start){alert("先に出勤を押してね");return;}
-// 計算
-function toMin(t){let[a,b]=t.split(':');return a*60+Number(b);}
-const w=toMin(end)-toMin(start);
-const work=(Math.floor(w/60)).toString().padStart(2,'0')+":"+(w%60).toString().padStart(2,'0');
-let rec=JSON.parse(load('records')||'[]');
-const d=new Date();
-const date=`${d.getDate()}`;
-rec.push({date,start,end,work,rest:""});
-save('records',JSON.stringify(rec));
-alert("退勤: "+end+"\n勤務時間: "+work);
-};
-</script>
-</body></html>
+</body>
+</html>
