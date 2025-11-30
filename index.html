@@ -4,15 +4,82 @@
   <meta charset="UTF-8">
   <title>イチニチ一歩 - ホーム</title>
   <style>
+    body {<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>イチニチ一歩 - ホーム</title>
+
+  <style>
     body {
       font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       background-color: #fff8e7;
       text-align: center;
-      padding: 40px;
-      font-size: 20px;
+      padding: 30px;
     }
+
     h1 {
       background-color: orange;
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 30px;
+      margin-bottom: 30px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 300px;
+      margin: auto;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    .btn {
+      padding: 18px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 2px solid orange;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #ffe0b2;
+      border-color: #ff9800;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 15px;
+      color: #555;
+    }
+  </style>
+
+</head>
+<body>
+
+  <h1>イチニチ一歩</h1>
+
+  <div class="menu">
+    <a href="record.html"><div class="btn">🌙 睡眠を記録する</div></a>
+    <a href="history.html"><div class="btn">📄 睡眠履歴を見る</div></a>
+    <a href="graph.html"><div class="btn">📊 グラフを見る</div></a>
+  </div>
+
+  <footer>
+    卒業研究：睡眠改善アプリ  
+  </footer>
+
+</body>
+</html>
+
       color: white;
       padding: 16px;
       border-radius: 12px;
