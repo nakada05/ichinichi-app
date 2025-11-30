@@ -3,70 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>イチニチ一歩 - ホーム</title>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      background-color: #fff8e7;
-      text-align: center;
-      padding: 30px;
-    }
-
-    h1 {
-      background-color: orange;
-      color: white;
-      padding: 15px;
-      border-radius: 12px;
-      font-size: 30px;
-      margin-bottom: 30px;
-    }
-
-    .menu {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 300px;
-      margin: auto;
-    }
-
-    a {
-      text-decoration: none;
-    }
-
-    .btn {
-      padding: 18px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      border: 2px solid orange;
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-      transition: 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #ffe0b2;
-      border-color: #ff9800;
-    }
-
-    footer {
-      margin-top: 50px;
-      font-size: 15px;
-      color: #555;
-    }
+    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:30px;text-align:center}
+    h1{background:orange;color:#fff;padding:14px;border-radius:12px;font-size:28px;}
+    .menu{display:flex;flex-direction:column;gap:16px;max-width:360px;margin:30px auto}
+    .btn{padding:14px;border-radius:12px;border:2px solid orange;background:#fff;font-weight:700;text-decoration:none;color:#333;font-size:18px}
+    .btn:hover{background:#ffe0b2}
+    small{display:block;margin-top:20px;color:#666}
   </style>
-
 </head>
 <body>
-
   <h1>イチニチ一歩</h1>
-
   <div class="menu">
-    <a href="record.html"><div class="btn">🌙 睡眠記録</div></a>
-    <a href="history.html"><div class="btn">📄 睡眠履歴</div></a>
-    <a href="graph.html"><div class="btn">📊 グラフ</div></a>
+    <a class="btn" href="record.html">🌙 睡眠を記録する</a>
+    <a class="btn" href="history.html">📄 睡眠履歴を見る</a>
+    <a class="btn" href="graph.html">📊 睡眠グラフ</a>
   </div>
-
-
+  <small>データはブラウザのローカルに保存されます（卒論用のローカル版）</small>
 </body>
 </html>
