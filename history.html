@@ -2,11 +2,81 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>履歴</title>
+  <title>睡眠履歴</title>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background-color: #fff8e7;
+      padding: 20px;
+      font-size: 18px;
+    }
+
+    h1 {
+      background-color: orange;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ffe0b2;
+      font-size: 18px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fff5e6;
+    }
+  </style>
 </head>
 <body>
-  <h1>📅 睡眠履歴</h1>
-  <p>あとで開発する予定</p>
-  <a href="index.html">ホームへ戻る</a>
+
+  <h1>睡眠履歴</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>日付</th>
+        <th>睡眠時間</th>
+        <th>行動</th>
+        <th>気分</th>
+        <th>日記</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    const records = JSON.parse(localStorage.getItem("sleepData") || "[]");
+
+    const tbody = document.getElementById("tableBody");
+
+    records.forEach(r => {
+      const row = `
+        <tr>
+          <td>${r.date}</td>
+          <td>${r.duration}時間</td>
+          <td>${r.action || "ー"}</td>
+          <td>${r.mood || "ー"}</td>
+          <td>${r.diary || "ー"}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  </script>
+
 </body>
 </html>
