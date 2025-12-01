@@ -50,6 +50,7 @@
       const rows = loadRecords();
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
+
       if (!rows.length) {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td colspan="8" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
@@ -59,12 +60,16 @@
 
       rows.forEach((r, i) => {
         const tr = document.createElement('tr');
-        const diaryShort = r.diary ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary) : '';
+
+        const diaryShort = r.diary
+          ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
+          : '';
+
         tr.innerHTML = `
-          <td>${r.date}</td>
-          <td>${Number(r.duration).toFixed(1)}時間</td>
-          <td>${r.sleepTime}</td>
-          <td>${r.wakeTime}</td>
+          <td>${r.date || 'ー'}</td>
+          <td>${r.duration ? Number(r.duration).toFixed(1) + '時間' : 'ー'}</td>
+          <td>${r.sleepTime || 'ー'}</td>
+          <td>${r.wakeTime || 'ー'}</td>
           <td>${r.action || 'ー'}</td>
           <td>${r.mood || 'ー'}</td>
           <td title="${r.diary || ''}">${diaryShort}</td>
@@ -84,12 +89,12 @@
     function deleteRecord(i) {
       if (!confirm('本当に削除しますか？')) return;
       const r = loadRecords();
-      r.splice(i,1);
+      r.splice(i, 1);
       saveRecords(r);
       render();
     }
 
-    // 初回レンダリング
+    // 初期表示
     render();
   </script>
 </body>
