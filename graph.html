@@ -4,60 +4,69 @@
   <meta charset="UTF-8">
   <title>睡眠グラフ</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:22px;text-align:center}
-    h1{background:orange;color:#fff;padding:12px;border-radius:12px}
-    canvas{max-width:92%;margin-top:18px}
-    a{display:inline-block;margin-top:16px;color:#333;text-decoration:none;padding:8px 14px;border:2px solid orange;border-radius:10px}
-    a:hover{background:#ffe0b2}
+    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:18px}
+    h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
+    .top-link{display:block;margin-top:12px;text-decoration:none;color:#444}
+    .warning{color:#666;text-align:center;margin-top:20px}
   </style>
 </head>
 <body>
-  <h1>📊 睡眠時間の推移</h1>
-  <canvas id="chart" width="400" height="220"></canvas>
-  <div>
-    <a href="history.html">← 履歴を見る</a>
-    <a href="index.html" style="margin-left:10px">ホームへ</a>
-  </div>
+  <h1>睡眠グラフ</h1>
+  <a class="top-link" href="index.html">← ホーム</a>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <canvas id="sleepGraph" style="margin-top:20px;"></canvas>
+  <p id="msg" class="warning"></p>
+
   <script>
-    const rec = JSON.parse(localStorage.getItem('sleepData') || '[]');
-    // 日付ラベル（そのまま）と数値配列
-    const labels = rec.map(r => r.date || '');
-    const values = rec.map(r => {
-      const v = Number(r.duration);
-      return Number.isFinite(v) ? v : null;
-    });
+    function loadRecords() {
+      return JSON.parse(localStorage.getItem('sleepData') || '[]');
+    }
 
-    const ctx = document.getElementById('chart').getContext('2d');
+    function createGraph() {
+      const data = loadRecords();
 
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: '睡眠時間（時間）',
-          data: values,
-          borderColor: '#ff9800',
-          backgroundColor: 'rgba(255,152,0,0.15)',
-          tension: 0.25,
-          fill: true,
-          pointRadius: 5
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: '時間(h)' }
-          }
-        },
-        plugins: {
-          legend: { display: false }
-        }
+      // ----- データなし対策 -----
+      if (!data.length) {
+        document.getElementById('msg').textContent = "まだデータがありません。記録するとグラフが表示されます。";
+        return;
       }
-    });
+
+      // ----- Safariエラー対策：日付・数値は必ず安全に -----
+      const labels = data.map(r => r.date || "不明");
+      const hours = data.map(r =>
+        r.duration && !isNaN(r.duration)
+          ? Number(r.duration)
+          : 0
+      );
+
+      const ctx = document.getElementById('sleepGraph').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "睡眠時間（時間）",
+            data: hours,
+            borderWidth: 2,
+            fill: false,
+            tension: 0.3
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "睡眠時間（h）" }
+            }
+          }
+        }
+      });
+    }
+
+    createGraph();
   </script>
 </body>
 </html>
