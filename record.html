@@ -8,11 +8,20 @@
     body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:22px}
     h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
     label{display:block;margin-top:12px;font-weight:700}
-    input[type="time"], input[type="date"], textarea{width:100%;max-width:320px;padding:8px;border-radius:8px;border:1px solid #bbb;margin-top:6px}
+    input[type="time"], input[type="date"], textarea{
+      width:100%;max-width:320px;padding:8px;
+      border-radius:8px;border:1px solid #bbb;margin-top:6px
+    }
     .btn-row{margin-top:12px}
-    .select-btn{margin:6px;padding:8px 14px;border-radius:10px;border:none;background:#f0f0f0;cursor:pointer}
+    .select-btn{
+      margin:6px;padding:8px 14px;border-radius:10px;border:none;
+      background:#f0f0f0;cursor:pointer
+    }
     .active{background:#ffcc80;border:2px solid orange;font-weight:700}
-    #saveBtn{margin-top:20px;padding:12px 20px;border-radius:12px;background:orange;color:#fff;border:none;font-size:16px}
+    #saveBtn{
+      margin-top:20px;padding:12px 20px;border-radius:12px;
+      background:orange;color:#fff;border:none;font-size:16px
+    }
     a.back{display:block;margin-top:18px;color:#444;text-decoration:none}
   </style>
 </head>
@@ -47,7 +56,7 @@
   </div>
 
   <label>日記（任意）</label>
-  <textarea id="diary" rows="4" placeholder="今日の出来事や感想を入力"></textarea>
+  <textarea id="diary" rows="4" placeholder="今日の感想など"></textarea>
 
   <div class="btn-row">
     <button id="saveBtn" onclick="saveData()">保存</button>
@@ -59,96 +68,92 @@
     const $ = id => document.getElementById(id);
     let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
 
-    function setTodayDate() {
-      const today = new Date().toISOString().slice(0,10);
-      if (!$('dateInput').value) $('dateInput').value = today;
+    // 今日の日付を自動セット
+    function setToday() {
+      const today = new Date().toISOString().substring(0,10);
+      if (!$("dateInput").value) $("dateInput").value = today;
     }
-    setTodayDate();
+    setToday();
 
-    function calcSleepDurationVal() {
-      const sleep = $('sleepTime').value;
-      const wake = $('wakeTime').value;
-      if (!sleep || !wake) return null;
-      const s = new Date(`1970-01-01T${sleep}:00`);
-      let w = new Date(`1970-01-01T${wake}:00`);
-      if (w <= s) w.setDate(w.getDate() + 1);
-      const hours = (w - s) / (1000 * 60 * 60);
-      return Number(hours.toFixed(1));
-    }
+    // 睡眠時間計算（Safari対応）
+    function calcDuration() {
+      const s = $("sleepTime").value;
+      const w = $("wakeTime").value;
+      if (!s || !w) return null;
 
-    function updateDurationText() {
-      const v = calcSleepDurationVal();
-      $('sleepDuration').textContent = v !== null ? `睡眠時間：${v}時間` : '睡眠時間：--時間';
-      return v;
+      const start = new Date(`2020-01-01T${s}:00`);
+      let end = new Date(`2020-01-01T${w}:00`);
+      if (end <= start) end.setDate(end.getDate() + 1);
+
+      const hours = (end - start) / (1000 * 60 * 60);
+      return Math.round(hours * 10) / 10;
     }
 
-    $('sleepTime').addEventListener('change', updateDurationText);
-    $('wakeTime').addEventListener('change', updateDurationText);
-
-    function activateButton(btn, groupId) {
-      document.querySelectorAll(`#${groupId} .select-btn`).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    function updateDuration() {
+      const v = calcDuration();
+      $("sleepDuration").textContent = v ? `睡眠時間：${v}時間` : "睡眠時間：--時間";
     }
 
-    let currentAction = '';
-    let currentMood = '';
+    $("sleepTime").addEventListener("change", updateDuration);
+    $("wakeTime").addEventListener("change", updateDuration);
 
-    function setAction(btn, a) {
-      currentAction = a;
-      activateButton(btn, 'actionButtons');
+    let currentAction = "";
+    let currentMood = "";
+
+    function setAction(btn, value) {
+      document.querySelectorAll("#actionButtons .select-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentAction = value;
     }
 
-    function setMood(btn, m) {
-      currentMood = m;
-      activateButton(btn, 'moodButtons');
+    function setMood(btn, value) {
+      document.querySelectorAll("#moodButtons .select-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentMood = value;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const editIndex = params.has('edit') ? Number(params.get('edit')) : null;
+    // 編集モードチェック
+    const params = new URLSearchParams(location.search);
+    const editIndex = params.has("edit") ? Number(params.get("edit")) : null;
 
-    if (editIndex !== null && Number.isInteger(editIndex) && records[editIndex]) {
+    if (editIndex !== null && records[editIndex]) {
       const e = records[editIndex];
-      $('dateInput').value = e.date || '';
-      $('sleepTime').value = e.sleepTime || '';
-      $('wakeTime').value = e.wakeTime || '';
-      $('diary').value = e.diary || '';
-      if (e.action) {
-        currentAction = e.action;
-        document.querySelectorAll('#actionButtons .select-btn').forEach(b => {
-          if (b.textContent === e.action) b.classList.add('active');
-        });
-      }
-      if (e.mood) {
-        currentMood = e.mood;
-        document.querySelectorAll('#moodButtons .select-btn').forEach(b => {
-          if (b.textContent === e.mood) b.classList.add('active');
-        });
-      }
-      updateDurationText();
-      $('saveBtn').textContent = '更新して保存';
+      $("dateInput").value = e.date || "";
+      $("sleepTime").value = e.sleepTime || "";
+      $("wakeTime").value = e.wakeTime || "";
+      $("diary").value = e.diary || "";
+
+      // ボタンのハイライト
+      document.querySelectorAll("#actionButtons .select-btn").forEach(b => {
+        if (b.textContent === e.action) b.classList.add("active");
+      });
+      currentAction = e.action;
+
+      document.querySelectorAll("#moodButtons .select-btn").forEach(b => {
+        if (b.textContent === e.mood) b.classList.add("active");
+      });
+      currentMood = e.mood;
+
+      $("saveBtn").textContent = "更新して保存";
+      updateDuration();
     }
 
+    // 保存処理
     function saveData() {
-      const date = $('dateInput').value;
-      const sleepTime = $('sleepTime').value;
-      const wakeTime = $('wakeTime').value;
-      const diary = $('diary').value;
-      const duration = calcSleepDurationVal();
+      const entry = {
+        date: $("dateInput").value,
+        sleepTime: $("sleepTime").value,
+        wakeTime: $("wakeTime").value,
+        duration: calcDuration(),
+        action: currentAction,
+        mood: currentMood,
+        diary: $("diary").value
+      };
 
-      if (!date || !sleepTime || !wakeTime || duration === null) {
-        alert('日付・就寝時間・起床時間を入力してください');
+      if (!entry.date || !entry.sleepTime || !entry.wakeTime || entry.duration === null) {
+        alert("日付・時間を入力してください");
         return;
       }
-
-      const entry = {
-        date,
-        sleepTime,
-        wakeTime,
-        duration,
-        action: currentAction || '',
-        mood: currentMood || '',
-        diary: diary || ''
-      };
 
       if (editIndex !== null && records[editIndex]) {
         records[editIndex] = entry;
@@ -156,9 +161,9 @@
         records.push(entry);
       }
 
-      localStorage.setItem('sleepData', JSON.stringify(records));
-      alert(editIndex !== null ? '更新しました！' : '保存しました！');
-      window.location.href = 'history.html';
+      localStorage.setItem("sleepData", JSON.stringify(records));
+      alert("保存しました！");
+      location.href = "history.html";
     }
   </script>
 </body>
