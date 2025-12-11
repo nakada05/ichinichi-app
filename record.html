@@ -75,7 +75,7 @@
     }
     setToday();
 
-    // 睡眠時間計算（Safari対応）
+    // 睡眠時間計算
     function calcDuration() {
       const s = $("sleepTime").value;
       const w = $("wakeTime").value;
@@ -112,7 +112,7 @@
       currentMood = value;
     }
 
-    // 編集モードチェック
+    // 編集モード
     const params = new URLSearchParams(location.search);
     const editIndex = params.has("edit") ? Number(params.get("edit")) : null;
 
@@ -123,7 +123,7 @@
       $("wakeTime").value = e.wakeTime || "";
       $("diary").value = e.diary || "";
 
-      // ボタンのハイライト
+      // ボタン反映
       document.querySelectorAll("#actionButtons .select-btn").forEach(b => {
         if (b.textContent === e.action) b.classList.add("active");
       });
@@ -138,6 +138,27 @@
       updateDuration();
     }
 
+    // -------------------------
+    // ★ 行動に応じたアドバイス生成
+    // -------------------------
+    function makeAdvice(action) {
+      if (!action) return "行動が記録されていません。";
+
+      if (action.includes("スマホ"))
+        return "寝る前のスマホはブルーライトで眠りが浅くなるよ。画面の明るさを落とすか、早めにやめるのがおすすめ！";
+
+      if (action.includes("読書"))
+        return "読書はリラックスに最適！睡眠の質アップにつながる良い習慣です。";
+
+      if (action.includes("ストレッチ"))
+        return "ストレッチは血流が良くなり、寝つきがよくなるよ。続けてみてね！";
+
+      if (action.includes("何もしなかった"))
+        return "ゆっくりする時間も大切。深呼吸を少しだけ取り入れるとさらに良いよ。";
+
+      return "その日の行動に合わせて無理せず続けていこう！";
+    }
+
     // 保存処理
     function saveData() {
       const entry = {
@@ -147,7 +168,10 @@
         duration: calcDuration(),
         action: currentAction,
         mood: currentMood,
-        diary: $("diary").value
+        diary: $("diary").value,
+
+        // ★ ここだけ追加した！
+        advice: makeAdvice(currentAction)
       };
 
       if (!entry.date || !entry.sleepTime || !entry.wakeTime || entry.duration === null) {
