@@ -186,7 +186,201 @@
       }
 
       localStorage.setItem("sleepData", JSON.stringify(records));
-      alert("保存しました！");
+      alert("保存しました！<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>睡眠を記録する</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:22px}
+    h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
+    label{display:block;margin-top:12px;font-weight:700}
+    input[type="time"], input[type="date"], textarea{
+      width:100%;max-width:320px;padding:8px;
+      border-radius:8px;border:1px solid #bbb;margin-top:6px
+    }
+    .btn-row{margin-top:12px}
+    .select-btn{
+      margin:6px;padding:8px 14px;border-radius:10px;border:none;
+      background:#f0f0f0;cursor:pointer
+    }
+    .active{background:#ffcc80;border:2px solid orange;font-weight:700}
+    #saveBtn{
+      margin-top:20px;padding:12px 20px;border-radius:12px;
+      background:orange;color:#fff;border:none;font-size:16px
+    }
+    a.back{display:block;margin-top:18px;color:#444;text-decoration:none}
+  </style>
+</head>
+<body>
+  <h1>睡眠を記録する</h1>
+
+  <label>日付</label>
+  <input type="date" id="dateInput">
+
+  <label>寝た時間（昨夜）</label>
+  <input type="time" id="sleepTime">
+
+  <label>起きた時間（今朝）</label>
+  <input type="time" id="wakeTime">
+
+  <p id="sleepDuration">睡眠時間：--時間</p>
+
+  <label>睡眠前の行動</label>
+  <div id="actionButtons">
+    <button class="select-btn" onclick="setAction(this,'スマホを見た')">スマホを見た</button>
+    <button class="select-btn" onclick="setAction(this,'読書した')">読書した</button>
+    <button class="select-btn" onclick="setAction(this,'ストレッチした')">ストレッチした</button>
+    <button class="select-btn" onclick="setAction(this,'何もしなかった')">何もしなかった</button>
+  </div>
+
+  <label>今日の気分</label>
+  <div id="moodButtons">
+    <button class="select-btn" onclick="setMood(this,'幸せ')">😄</button>
+    <button class="select-btn" onclick="setMood(this,'無')">😑</button>
+    <button class="select-btn" onclick="setMood(this,'眠い')">😪</button>
+    <button class="select-btn" onclick="setMood(this,'体調不良')">🤧</button>
+  </div>
+
+  <label>日記（任意）</label>
+  <textarea id="diary" rows="4" placeholder="今日の感想など"></textarea>
+
+  <div class="btn-row">
+    <button id="saveBtn" onclick="saveData()">保存</button>
+  </div>
+
+  <a class="back" href="index.html">← ホームに戻る</a>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
+
+    // 今日の日付を自動セット
+    function setToday() {
+      const today = new Date().toISOString().substring(0,10);
+      if (!$("dateInput").value) $("dateInput").value = today;
+    }
+    setToday();
+
+    // 睡眠時間計算
+    function calcDuration() {
+      const s = $("sleepTime").value;
+      const w = $("wakeTime").value;
+      if (!s || !w) return null;
+
+      const start = new Date(`2020-01-01T${s}:00`);
+      let end = new Date(`2020-01-01T${w}:00`);
+      if (end <= start) end.setDate(end.getDate() + 1);
+
+      const hours = (end - start) / (1000 * 60 * 60);
+      return Math.round(hours * 10) / 10;
+    }
+
+    function updateDuration() {
+      const v = calcDuration();
+      $("sleepDuration").textContent = v ? `睡眠時間：${v}時間` : "睡眠時間：--時間";
+    }
+
+    $("sleepTime").addEventListener("change", updateDuration);
+    $("wakeTime").addEventListener("change", updateDuration);
+
+    let currentAction = "";
+    let currentMood = "";
+
+    function setAction(btn, value) {
+      document.querySelectorAll("#actionButtons .select-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentAction = value;
+    }
+
+    function setMood(btn, value) {
+      document.querySelectorAll("#moodButtons .select-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentMood = value;
+    }
+
+    // 編集モード
+    const params = new URLSearchParams(location.search);
+    const editIndex = params.has("edit") ? Number(params.get("edit")) : null;
+
+    if (editIndex !== null && records[editIndex]) {
+      const e = records[editIndex];
+      $("dateInput").value = e.date || "";
+      $("sleepTime").value = e.sleepTime || "";
+      $("wakeTime").value = e.wakeTime || "";
+      $("diary").value = e.diary || "";
+
+      // ボタン反映
+      document.querySelectorAll("#actionButtons .select-btn").forEach(b => {
+        if (b.textContent === e.action) b.classList.add("active");
+      });
+      currentAction = e.action;
+
+      document.querySelectorAll("#moodButtons .select-btn").forEach(b => {
+        if (b.textContent === e.mood) b.classList.add("active");
+      });
+      currentMood = e.mood;
+
+      $("saveBtn").textContent = "更新して保存";
+      updateDuration();
+    }
+
+    // -------------------------
+    // ★ 行動に応じたアドバイス生成
+    // -------------------------
+    function makeAdvice(action) {
+      if (!action) return "行動が記録されていません。";
+
+      if (action.includes("スマホ"))
+        return "寝る前のスマホはブルーライトで眠りが浅くなるよ。画面の明るさを落とすか、早めにやめるのがおすすめ！";
+
+      if (action.includes("読書"))
+        return "読書はリラックスに最適！睡眠の質アップにつながる良い習慣です。";
+
+      if (action.includes("ストレッチ"))
+        return "ストレッチは血流が良くなり、寝つきがよくなるよ。続けてみてね！";
+
+      if (action.includes("何もしなかった"))
+        return "ゆっくりする時間も大切。深呼吸を少しだけ取り入れるとさらに良いよ。";
+
+      return "その日の行動に合わせて無理せず続けていこう！";
+    }
+
+    // 保存処理
+    function saveData() {
+      const entry = {
+        date: $("dateInput").value,
+        sleepTime: $("sleepTime").value,
+        wakeTime: $("wakeTime").value,
+        duration: calcDuration(),
+        action: currentAction,
+        mood: currentMood,
+        diary: $("diary").value,
+
+        // ★ ここだけ追加した！
+        advice: makeAdvice(currentAction)
+      };
+
+      if (!entry.date || !entry.sleepTime || !entry.wakeTime || entry.duration === null) {
+        alert("日付・時間を入力してください");
+        return;
+      }
+
+      if (editIndex !== null && records[editIndex]) {
+        records[editIndex] = entry;
+      } else {
+        records.push(entry);
+      }
+
+      localStorage.setItem("sleepData", JSON.stringify(records));
+      alert("保存しました！\n\n今日のアドバイス：\n${entry.advice}");
+      location.href = "history.html";
+    }
+  </script>
+</body>
+</html>
+");
       location.href = "history.html";
     }
   </script>
