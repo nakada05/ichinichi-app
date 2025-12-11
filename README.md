@@ -1,1 +1,0 @@
-# ichinichi-app
