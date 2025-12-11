@@ -15,6 +15,7 @@
     .del{background:#fff;color:#d9534f;border:2px solid #f7cfcf}
     .small{font-size:13px;color:#666}
     .top-link{display:block;margin-top:12px;text-decoration:none;color:#444}
+    .advice{font-size:13px;color:#444;margin-top:4px;text-align:left;}
   </style>
 </head>
 <body>
@@ -32,6 +33,7 @@
         <th>行動</th>
         <th>気分</th>
         <th>日記</th>
+        <th>アドバイス</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -48,54 +50,58 @@
     }
 
     function render() {
-  const rows = loadRecords();
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
+      const rows = loadRecords();
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
 
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="8" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
-    tbody.appendChild(tr);
-    document.getElementById('avgSleep').textContent = `平均睡眠時間：ー`;
-    return;
-  }
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="9" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
+        tbody.appendChild(tr);
+        document.getElementById('avgSleep').textContent = `平均睡眠時間：ー`;
+        return;
+      }
 
-  rows.forEach((r, i) => {
-    const tr = document.createElement('tr');
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
 
-    const diaryShort = r.diary
-      ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
-      : '';
+        const diaryShort = r.diary
+          ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
+          : '';
 
-    tr.innerHTML = `
-      <td>${r.date || 'ー'}</td>
-      <td>${r.duration ? Number(r.duration).toFixed(1) + '時間' : 'ー'}</td>
-      <td>${r.sleepTime || 'ー'}</td>
-      <td>${r.wakeTime || 'ー'}</td>
-      <td>${r.action || 'ー'}</td>
-      <td>${r.mood || 'ー'}</td>
-      <td title="${r.diary || ''}">${diaryShort}</td>
-      <td>
-        <button class="btn edit" onclick="editRecord(${i})">編集</button>
-        <button class="btn del" onclick="deleteRecord(${i})">削除</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+        const adviceShort = r.advice
+          ? (r.advice.length > 30 ? r.advice.slice(0,30) + '…' : r.advice)
+          : '';
 
-  // ▼▼ 平均睡眠時間の計算と表示 ▼▼
-  const durations = rows
-    .map(r => Number(r.duration))
-    .filter(v => !isNaN(v));
+        tr.innerHTML = `
+          <td>${r.date || 'ー'}</td>
+          <td>${r.duration ? Number(r.duration).toFixed(1) + '時間' : 'ー'}</td>
+          <td>${r.sleepTime || 'ー'}</td>
+          <td>${r.wakeTime || 'ー'}</td>
+          <td>${r.action || 'ー'}</td>
+          <td>${r.mood || 'ー'}</td>
+          <td title="${r.diary || ''}">${diaryShort}</td>
+          <td title="${r.advice || ''}" class="advice">${adviceShort}</td>
+          <td>
+            <button class="btn edit" onclick="editRecord(${i})">編集</button>
+            <button class="btn del" onclick="deleteRecord(${i})">削除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
 
-  if (durations.length) {
-    const avg = (durations.reduce((a,b) => a + b, 0) / durations.length).toFixed(1);
-    document.getElementById('avgSleep').textContent = `平均睡眠時間：${avg} 時間`;
-  } else {
-    document.getElementById('avgSleep').textContent = `平均睡眠時間：ー`;
-  }
-}
+      // 平均睡眠時間
+      const durations = rows
+        .map(r => Number(r.duration))
+        .filter(v => !isNaN(v));
 
+      if (durations.length) {
+        const avg = (durations.reduce((a,b) => a + b, 0) / durations.length).toFixed(1);
+        document.getElementById('avgSleep').textContent = `平均睡眠時間：${avg} 時間`;
+      } else {
+        document.getElementById('avgSleep').textContent = `平均睡眠時間：ー`;
+      }
+    }
 
     function editRecord(i) {
       window.location.href = `record.html?edit=${i}`;
@@ -109,7 +115,6 @@
       render();
     }
 
-    // 初期表示
     render();
   </script>
 </body>
