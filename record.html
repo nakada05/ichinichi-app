@@ -5,24 +5,68 @@
   <title>睡眠を記録する</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:22px}
-    h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
-    label{display:block;margin-top:12px;font-weight:700}
-    input[type="time"], input[type="date"], textarea{
-      width:100%;max-width:320px;padding:8px;
-      border-radius:8px;border:1px solid #bbb;margin-top:6px
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      background: #fff8e7;
+      padding: 22px;
     }
-    .btn-row{margin-top:12px}
-    .select-btn{
-      margin:6px;padding:8px 14px;border-radius:10px;border:none;
-      background:#f0f0f0;cursor:pointer
+    h1 {
+      background: orange;
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
     }
-    .active{background:#ffcc80;border:2px solid orange;font-weight:700}
-    #saveBtn{
-      margin-top:20px;padding:12px 20px;border-radius:12px;
-      background:orange;color:#fff;border:none;font-size:16px
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 700;
     }
-    a.back{display:block;margin-top:18px;color:#444;text-decoration:none}
+    input[type="time"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      max-width: 320px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      margin-top: 6px;
+      box-sizing: border-box;
+    }
+    .btn-row {
+      margin-top: 12px;
+    }
+    .select-btn {
+      display: inline-block;
+      margin: 6px 4px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      background: #f0f0f0;
+      cursor: pointer;
+      min-width: 80px;
+      text-align: center;
+    }
+    .active {
+      background: #ffcc80;
+      border: 2px solid orange;
+      font-weight: 700;
+    }
+    #saveBtn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: orange;
+      color: #fff;
+      border: none;
+      font-size: 16px;
+    }
+    a.back {
+      display: block;
+      margin-top: 18px;
+      color: #444;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -123,7 +167,6 @@
       $("wakeTime").value = e.wakeTime || "";
       $("diary").value = e.diary || "";
 
-      // ボタン反映
       document.querySelectorAll("#actionButtons .select-btn").forEach(b => {
         if (b.textContent === e.action) b.classList.add("active");
       });
@@ -138,21 +181,16 @@
       updateDuration();
     }
 
-    // -------------------------
     // 行動に応じたアドバイス生成
-    // -------------------------
     function makeAdvice(action) {
       if (!action) return "行動が記録されていません。";
 
       if (action.includes("スマホ"))
-        return "寝る前のスマホはブルーライトで眠りが浅くなるよ。気をつけて！";
-
+        return "寝る前のスマホはブルーライトで眠りが浅くなるよ。画面の明るさを落とすか、早めにやめるのがおすすめ！";
       if (action.includes("読書"))
         return "読書はリラックスに最適！睡眠の質アップにつながる良い習慣です。";
-
       if (action.includes("ストレッチ"))
         return "ストレッチは血流が良くなり、寝つきがよくなるよ。続けてみてね！";
-
       if (action.includes("何もしなかった"))
         return "ゆっくりする時間も大切。深呼吸を少しだけ取り入れるとさらに良いよ。";
 
@@ -185,9 +223,8 @@
 
       localStorage.setItem("sleepData", JSON.stringify(records));
 
-      // ✅ 修正済み：alert に HTML を入れない
+      // ★ アラートはテンプレートリテラルに変更
       alert(`保存しました！\n\n今日のアドバイス：\n${entry.advice}`);
-
       location.href = "history.html";
     }
   </script>
