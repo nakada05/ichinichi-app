@@ -15,7 +15,6 @@
     .del{background:#fff;color:#d9534f;border:2px solid #f7cfcf}
     .small{font-size:13px;color:#666}
     .top-link{display:block;margin-top:12px;text-decoration:none;color:#444}
-    .advice{font-size:13px;color:#444;margin-top:4px;text-align:left;}
   </style>
 </head>
 <body>
@@ -33,7 +32,6 @@
         <th>行動</th>
         <th>気分</th>
         <th>日記</th>
-        <th>アドバイス</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -56,7 +54,7 @@
 
       if (!rows.length) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="9" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
+        tr.innerHTML = `<td colspan="8" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
         tbody.appendChild(tr);
         document.getElementById('avgSleep').textContent = `平均睡眠時間：ー`;
         return;
@@ -69,10 +67,6 @@
           ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
           : '';
 
-        const adviceShort = r.advice
-          ? (r.advice.length > 30 ? r.advice.slice(0,30) + '…' : r.advice)
-          : '';
-
         tr.innerHTML = `
           <td>${r.date || 'ー'}</td>
           <td>${r.duration ? Number(r.duration).toFixed(1) + '時間' : 'ー'}</td>
@@ -81,7 +75,6 @@
           <td>${r.action || 'ー'}</td>
           <td>${r.mood || 'ー'}</td>
           <td title="${r.diary || ''}">${diaryShort}</td>
-          <td title="${r.advice || ''}" class="advice">${adviceShort}</td>
           <td>
             <button class="btn edit" onclick="editRecord(${i})">編集</button>
             <button class="btn del" onclick="deleteRecord(${i})">削除</button>
