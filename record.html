@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>睡眠を記録する</title>
+  <title>睡眠の質を記録する</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body {
@@ -33,9 +33,6 @@
       margin-top: 6px;
       box-sizing: border-box;
     }
-    .btn-row {
-      margin-top: 12px;
-    }
     .select-btn {
       display: inline-block;
       margin: 6px 4px;
@@ -45,7 +42,6 @@
       background: #f0f0f0;
       cursor: pointer;
       min-width: 80px;
-      text-align: center;
     }
     .active {
       background: #ffcc80;
@@ -61,7 +57,7 @@
       border: none;
       font-size: 16px;
     }
-    a.back {
+    .back {
       display: block;
       margin-top: 18px;
       color: #444;
@@ -69,164 +65,142 @@
     }
   </style>
 </head>
+
 <body>
-  <h1>睡眠を記録する</h1>
+<h1>睡眠の質を記録する</h1>
 
-  <label>日付</label>
-  <input type="date" id="dateInput">
+<label>日付</label>
+<input type="date" id="dateInput">
 
-  <label>寝た時間（昨夜）</label>
-  <input type="time" id="sleepTime">
+<label>寝た時間</label>
+<input type="time" id="sleepTime">
 
-  <label>起きた時間（今朝）</label>
-  <input type="time" id="wakeTime">
+<label>起きた時間</label>
+<input type="time" id="wakeTime">
 
-  <p id="sleepDuration">睡眠時間：--時間</p>
+<p id="sleepDuration">睡眠時間：--時間</p>
+<p id="sleepScore">睡眠スコア：--点</p>
 
-  <label>睡眠前の行動</label>
-  <div id="actionButtons">
-    <button class="select-btn" onclick="setAction(this,'スマホを見た')">スマホを見た</button>
-    <button class="select-btn" onclick="setAction(this,'読書した')">読書した</button>
-    <button class="select-btn" onclick="setAction(this,'ストレッチした')">ストレッチした</button>
-    <button class="select-btn" onclick="setAction(this,'何もしなかった')">何もしなかった</button>
-  </div>
+<label>睡眠前の行動</label>
+<div id="actionButtons">
+  <button class="select-btn" onclick="setAction(this,'スマホを見た')">スマホ</button>
+  <button class="select-btn" onclick="setAction(this,'読書した')">読書</button>
+  <button class="select-btn" onclick="setAction(this,'ストレッチした')">ストレッチ</button>
+  <button class="select-btn" onclick="setAction(this,'何もしなかった')">何もしない</button>
+</div>
 
-  <label>今日の気分</label>
-  <div id="moodButtons">
-    <button class="select-btn" onclick="setMood(this,'幸せ')">😄</button>
-    <button class="select-btn" onclick="setMood(this,'無')">😑</button>
-    <button class="select-btn" onclick="setMood(this,'眠い')">😪</button>
-    <button class="select-btn" onclick="setMood(this,'体調不良')">🤧</button>
-  </div>
+<label>起床後の気分</label>
+<div id="moodButtons">
+  <button class="select-btn" onclick="setMood(this,'幸せ')">😄</button>
+  <button class="select-btn" onclick="setMood(this,'無')">😑</button>
+  <button class="select-btn" onclick="setMood(this,'眠い')">😪</button>
+  <button class="select-btn" onclick="setMood(this,'体調不良')">🤧</button>
+</div>
 
-  <label>日記（任意）</label>
-  <textarea id="diary" rows="4" placeholder="今日の感想など"></textarea>
+<label>日記（任意）</label>
+<textarea id="diary" rows="4"></textarea>
 
-  <div class="btn-row">
-    <button id="saveBtn" onclick="saveData()">保存</button>
-  </div>
+<button id="saveBtn" onclick="saveData()">保存</button>
+<a class="back" href="index.html">← ホームに戻る</a>
 
-  <a class="back" href="index.html">← ホームに戻る</a>
+<script>
+const $ = id => document.getElementById(id);
+let records = JSON.parse(localStorage.getItem("sleepData") || "[]");
+let currentAction = "";
+let currentMood = "";
 
-  <script>
-    const $ = id => document.getElementById(id);
-    let records = JSON.parse(localStorage.getItem('sleepData') || '[]');
+// 今日の日付
+$("dateInput").value = new Date().toISOString().slice(0,10);
 
-    // 今日の日付を自動セット
-    function setToday() {
-      const today = new Date().toISOString().substring(0,10);
-      if (!$("dateInput").value) $("dateInput").value = today;
-    }
-    setToday();
+// 睡眠時間計算
+function calcDuration() {
+  const s = $("sleepTime").value;
+  const w = $("wakeTime").value;
+  if (!s || !w) return null;
 
-    // 睡眠時間計算
-    function calcDuration() {
-      const s = $("sleepTime").value;
-      const w = $("wakeTime").value;
-      if (!s || !w) return null;
+  const start = new Date(`2020-01-01T${s}`);
+  let end = new Date(`2020-01-01T${w}`);
+  if (end <= start) end.setDate(end.getDate() + 1);
 
-      const start = new Date(`2020-01-01T${s}:00`);
-      let end = new Date(`2020-01-01T${w}:00`);
-      if (end <= start) end.setDate(end.getDate() + 1);
+  return Math.round((end - start) / 360000) / 10;
+}
 
-      const hours = (end - start) / (1000 * 60 * 60);
-      return Math.round(hours * 10) / 10;
-    }
+// 睡眠スコア計算
+function calcSleepScore(duration, action, mood) {
+  let score = 0;
 
-    function updateDuration() {
-      const v = calcDuration();
-      $("sleepDuration").textContent = v ? `睡眠時間：${v}時間` : "睡眠時間：--時間";
-    }
+  // 睡眠時間（根拠：成人7〜9時間）
+ // 睡眠時間（WHO:7-9h、厚労省:6-8h を踏まえ 6-9h）
+if (duration >= 6 && duration <= 9) score += 50;
+else if ((duration >= 5 && duration < 6) || (duration > 9 && duration <= 10)) score += 40;
+else if ((duration >= 4 && duration < 5) || duration > 10) score += 30;
+else score += 20;
 
-    $("sleepTime").addEventListener("change", updateDuration);
-    $("wakeTime").addEventListener("change", updateDuration);
 
-    let currentAction = "";
-    let currentMood = "";
+  // 行動
+  if (action === "ストレッチした") score += 30;
+  else if (action === "読書した") score += 25;
+  else if (action === "何もしなかった") score += 20;
+  else if (action === "スマホを見た") score += 10;
 
-    function setAction(btn, value) {
-      document.querySelectorAll("#actionButtons .select-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentAction = value;
-    }
+  // 気分
+  if (mood === "幸せ") score += 20;
+  else if (mood === "無") score += 15;
+  else if (mood === "眠い") score += 10;
+  else if (mood === "体調不良") score += 5;
 
-    function setMood(btn, value) {
-      document.querySelectorAll("#moodButtons .select-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentMood = value;
-    }
+  return score;
+}
 
-    // 編集モード
-    const params = new URLSearchParams(location.search);
-    const editIndex = params.has("edit") ? Number(params.get("edit")) : null;
+function updateView() {
+  const d = calcDuration();
+  if (!d) return;
 
-    if (editIndex !== null && records[editIndex]) {
-      const e = records[editIndex];
-      $("dateInput").value = e.date || "";
-      $("sleepTime").value = e.sleepTime || "";
-      $("wakeTime").value = e.wakeTime || "";
-      $("diary").value = e.diary || "";
+  $("sleepDuration").textContent = `睡眠時間：${d}時間`;
+  const score = calcSleepScore(d, currentAction, currentMood);
+  $("sleepScore").textContent = `睡眠スコア：${score}点`;
+}
 
-      document.querySelectorAll("#actionButtons .select-btn").forEach(b => {
-        if (b.textContent === e.action) b.classList.add("active");
-      });
-      currentAction = e.action;
+$("sleepTime").onchange = updateView;
+$("wakeTime").onchange = updateView;
 
-      document.querySelectorAll("#moodButtons .select-btn").forEach(b => {
-        if (b.textContent === e.mood) b.classList.add("active");
-      });
-      currentMood = e.mood;
+function setAction(btn, v) {
+  document.querySelectorAll("#actionButtons .select-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentAction = v;
+  updateView();
+}
 
-      $("saveBtn").textContent = "更新して保存";
-      updateDuration();
-    }
+function setMood(btn, v) {
+  document.querySelectorAll("#moodButtons .select-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentMood = v;
+  updateView();
+}
 
-    // 行動に応じたアドバイス生成
-    function makeAdvice(action) {
-      if (!action) return "行動が記録されていません。";
+function saveData() {
+  const duration = calcDuration();
+  if (!duration) {
+    alert("日付と時間を入力してください");
+    return;
+  }
 
-      if (action.includes("スマホ"))
-        return "寝る前のスマホはブルーライトで眠りが浅くなるよ。画面の明るさを落とすか、早めにやめるのがおすすめ！";
-      if (action.includes("読書"))
-        return "読書はリラックスに最適！睡眠の質アップにつながる良い習慣です。";
-      if (action.includes("ストレッチ"))
-        return "ストレッチは血流が良くなり、寝つきがよくなるよ。続けてみてね！";
-      if (action.includes("何もしなかった"))
-        return "ゆっくりする時間も大切。深呼吸を少しだけ取り入れるとさらに良いよ。";
+  const entry = {
+    date: $("dateInput").value,
+    sleepTime: $("sleepTime").value,
+    wakeTime: $("wakeTime").value,
+    duration,
+    action: currentAction,
+    mood: currentMood,
+    sleepScore: calcSleepScore(duration, currentAction, currentMood),
+    diary: $("diary").value
+  };
 
-      return "その日の行動に合わせて無理せず続けていこう！";
-    }
-
-    // 保存処理
-    function saveData() {
-      const entry = {
-        date: $("dateInput").value,
-        sleepTime: $("sleepTime").value,
-        wakeTime: $("wakeTime").value,
-        duration: calcDuration(),
-        action: currentAction,
-        mood: currentMood,
-        diary: $("diary").value,
-        advice: makeAdvice(currentAction)
-      };
-
-      if (!entry.date || !entry.sleepTime || !entry.wakeTime || entry.duration === null) {
-        alert("日付・時間を入力してください");
-        return;
-      }
-
-      if (editIndex !== null && records[editIndex]) {
-        records[editIndex] = entry;
-      } else {
-        records.push(entry);
-      }
-
-      localStorage.setItem("sleepData", JSON.stringify(records));
-
-      // ★ アラートはテンプレートリテラルに変更
-      alert(`保存しました！\n\n今日のアドバイス：\n${entry.advice}`);
-      location.href = "history.html";
-    }
-  </script>
+  records.push(entry);
+  localStorage.setItem("sleepData", JSON.stringify(records));
+  alert(`保存しました\n睡眠スコア：${entry.sleepScore}点`);
+  location.href = "history.html";
+}
+</script>
 </body>
 </html>
