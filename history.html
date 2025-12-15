@@ -37,6 +37,10 @@
       background: #ffeccf;
       font-weight: 700;
     }
+    .score {
+      font-weight: 700;
+      color: orange;
+    }
     .btn {
       padding: 6px 8px;
       border-radius: 8px;
@@ -57,6 +61,8 @@
     .small {
       font-size: 13px;
       color: #666;
+      text-align: center;
+      margin-top: 8px;
     }
     .top-link {
       display: block;
@@ -68,7 +74,10 @@
 </head>
 <body>
   <h1>睡眠履歴</h1>
-  <p id="avgSleep" class="small" style="text-align:center; margin-top:8px;"></p>
+
+  <p id="avgSleep" class="small"></p>
+  <p id="avgScore" class="small"></p>
+
   <a class="top-link" href="index.html">← ホーム</a>
 
   <table>
@@ -76,6 +85,7 @@
       <tr>
         <th>日付</th>
         <th>睡眠時間</th>
+        <th>スコア</th>
         <th>就寝</th>
         <th>起床</th>
         <th>行動</th>
@@ -88,6 +98,8 @@
   </table>
 
   <script>
+    function $(id){ return document.getElementById(id); }
+
     function loadRecords() {
       return JSON.parse(localStorage.getItem('sleepData') || '[]');
     }
@@ -96,25 +108,47 @@
       localStorage.setItem('sleepData', JSON.stringify(r));
     }
 
+    // ★ 睡眠スコア計算（厚生労働省：6〜8時間）
+    function calcScore(hours) {
+      if (hours >= 6 && hours <= 8) return 100;
+      if (hours >= 5 && hours < 6) return 80;
+      if (hours > 8 && hours <= 9) return 80;
+      if (hours >= 4 && hours < 5) return 60;
+      if (hours > 9 && hours <= 10) return 60;
+      return 40;
+    }
+
     function render() {
       const rows = loadRecords();
       const tbody = $("tbody");
       tbody.innerHTML = '';
 
       if (!rows.length) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td colspan="8" class="small">まだ記録がありません。記録を追加してみましょう。</td>`;
-        tbody.appendChild(tr);
-        $("avgSleep").textContent = `平均睡眠時間：ー`;
+        tbody.innerHTML = `<tr><td colspan="9" class="small">まだ記録がありません。</td></tr>`;
+        $("avgSleep").textContent = "平均睡眠時間：ー";
+        $("avgScore").textContent = "平均睡眠スコア：ー";
         return;
       }
 
+      let scores = [];
+      let durations = [];
+
       rows.forEach((r, i) => {
+        const hours = Number(r.duration);
+        const score = !isNaN(hours) ? calcScore(hours) : null;
+
+        if (!isNaN(hours)) durations.push(hours);
+        if (score !== null) scores.push(score);
+
+        const diaryShort = r.diary
+          ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
+          : '';
+
         const tr = document.createElement('tr');
-        const diaryShort = r.diary ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary) : '';
         tr.innerHTML = `
           <td>${r.date || 'ー'}</td>
-          <td>${r.duration ? Number(r.duration).toFixed(1) + '時間' : 'ー'}</td>
+          <td>${!isNaN(hours) ? hours.toFixed(1) + '時間' : 'ー'}</td>
+          <td class="score">${score ?? 'ー'}</td>
           <td>${r.sleepTime || 'ー'}</td>
           <td>${r.wakeTime || 'ー'}</td>
           <td>${r.action || 'ー'}</td>
@@ -128,11 +162,11 @@
         tbody.appendChild(tr);
       });
 
-      // 平均睡眠時間
-      const durations = rows.map(r => Number(r.duration)).filter(v => !isNaN(v));
-      $("avgSleep").textContent = durations.length
-        ? `平均睡眠時間：${(durations.reduce((a,b)=>a+b,0)/durations.length).toFixed(1)} 時間`
-        : `平均睡眠時間：ー`;
+      $("avgSleep").textContent =
+        `平均睡眠時間：${(durations.reduce((a,b)=>a+b,0)/durations.length).toFixed(1)} 時間`;
+
+      $("avgScore").textContent =
+        `平均睡眠スコア：${Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)} 点`;
     }
 
     function editRecord(i) {
@@ -146,8 +180,6 @@
       saveRecords(r);
       render();
     }
-
-    function $(id){ return document.getElementById(id); }
 
     render();
   </script>
