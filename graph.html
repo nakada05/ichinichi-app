@@ -44,16 +44,6 @@
     return JSON.parse(localStorage.getItem('sleepData') || '[]');
   }
 
-  // ★ 睡眠スコア（厚生労働省：6〜8時間）
-  function calcScore(hours){
-    if (hours >= 6 && hours <= 8) return 100;
-    if (hours >= 5 && hours < 6) return 80;
-    if (hours > 8 && hours <= 9) return 80;
-    if (hours >= 4 && hours < 5) return 60;
-    if (hours > 9 && hours <= 10) return 60;
-    return 40;
-  }
-
   function createGraph() {
     const data = loadRecords();
 
@@ -66,10 +56,13 @@
     const labels = data.map(r => r.date || "不明");
 
     const hours = data.map(r =>
-      r.duration && !isNaN(r.duration) ? Number(r.duration) : 0
+      r.duration && !isNaN(r.duration) ? Number(r.duration) : null
     );
 
-    const scores = hours.map(h => calcScore(h));
+    // ★ 保存済みスコアを使用（再計算しない）
+    const scores = data.map(r =>
+      typeof r.score === "number" ? r.score : null
+    );
 
     const ctx = document.getElementById('sleepGraph').getContext('2d');
 
@@ -128,7 +121,7 @@
     });
 
     document.getElementById('msg').textContent =
-      "睡眠スコアは、厚生労働省が推奨する6〜8時間の睡眠を満点（100点）として算出しています。";
+      "睡眠スコアは、睡眠時間・睡眠前の行動・起床時の気分をもとに算出しています。";
   }
 
   createGraph();
