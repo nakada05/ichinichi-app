@@ -29,6 +29,10 @@
       border-radius: 8px;
       border: 1px solid #bbb;
       margin-top: 6px;
+      box-sizing: border-box;
+    }
+    .btn-group {
+      margin-top: 6px;
     }
     .select-btn {
       margin: 6px 4px;
@@ -52,6 +56,12 @@
       border: none;
       font-size: 16px;
     }
+    .back {
+      display: block;
+      margin-top: 18px;
+      color: #444;
+      text-decoration: none;
+    }
   </style>
 </head>
 
@@ -71,7 +81,7 @@
 <p id="sleepScore">睡眠スコア：-- 点</p>
 
 <label>睡眠前の行動</label>
-<div>
+<div class="btn-group" id="actionGroup">
   <button class="select-btn" onclick="setAction(this,'スマホ')">スマホ</button>
   <button class="select-btn" onclick="setAction(this,'読書')">読書</button>
   <button class="select-btn" onclick="setAction(this,'ストレッチ')">ストレッチ</button>
@@ -79,7 +89,7 @@
 </div>
 
 <label>今日の気分</label>
-<div>
+<div class="btn-group" id="moodGroup">
   <button class="select-btn" onclick="setMood(this,'良い')">😄</button>
   <button class="select-btn" onclick="setMood(this,'普通')">😑</button>
   <button class="select-btn" onclick="setMood(this,'悪い')">😪</button>
@@ -89,6 +99,7 @@
 <textarea id="diary" rows="4"></textarea>
 
 <button id="saveBtn" onclick="saveData()">保存</button>
+<a href="index.html" class="back">← ホームに戻る</a>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -108,10 +119,10 @@ function calcDuration() {
   return Math.round((end - start) / 36e5 * 10) / 10;
 }
 
-function calcSleepScore(hours) {
-  if (hours >= 6 && hours <= 8) return 60;
-  if ((hours >= 5 && hours < 6) || (hours > 8 && hours <= 9)) return 40;
-  if ((hours >= 4 && hours < 5) || (hours > 9 && hours <= 10)) return 20;
+function calcSleepScore(h) {
+  if (h >= 6 && h <= 8) return 60;
+  if ((h >= 5 && h < 6) || (h > 8 && h <= 9)) return 40;
+  if ((h >= 4 && h < 5) || (h > 9 && h <= 10)) return 20;
   return 0;
 }
 
@@ -122,19 +133,21 @@ function updateView() {
   $("sleepScore").textContent = `睡眠スコア：${calcSleepScore(h)} 点`;
 }
 
-$("sleepTime").onchange = updateView;
-$("wakeTime").onchange = updateView;
+$("sleepTime").addEventListener("change", updateView);
+$("wakeTime").addEventListener("change", updateView);
 
 let action = "", mood = "";
 
 function setAction(btn, v) {
-  document.querySelectorAll(".select-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll("#actionGroup .select-btn")
+    .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   action = v;
 }
 
 function setMood(btn, v) {
-  document.querySelectorAll(".select-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll("#moodGroup .select-btn")
+    .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   mood = v;
 }
