@@ -6,10 +6,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;background:#fff8e7;padding:18px}
-    h1{background:orange;color:#fff;padding:12px;border-radius:12px;text-align:center}
-    .top-link{display:block;margin-top:12px;text-decoration:none;color:#444}
-    .warning{color:#666;text-align:center;margin-top:20px}
+    body{
+      font-family:"Hiragino Kaku Gothic ProN",sans-serif;
+      background:#fff8e7;
+      padding:18px
+    }
+    h1{
+      background:orange;
+      color:#fff;
+      padding:12px;
+      border-radius:12px;
+      text-align:center
+    }
+    .top-link{
+      display:block;
+      margin-top:12px;
+      text-decoration:none;
+      color:#444
+    }
+    .warning{
+      color:#666;
+      text-align:center;
+      margin-top:16px;
+      font-size:14px
+    }
   </style>
 </head>
 <body>
@@ -19,54 +39,99 @@
   <canvas id="sleepGraph" style="margin-top:20px;"></canvas>
   <p id="msg" class="warning"></p>
 
-  <script>
-    function loadRecords() {
-      return JSON.parse(localStorage.getItem('sleepData') || '[]');
+<script>
+  function loadRecords() {
+    return JSON.parse(localStorage.getItem('sleepData') || '[]');
+  }
+
+  // ★ 睡眠スコア（厚生労働省：6〜8時間）
+  function calcScore(hours){
+    if (hours >= 6 && hours <= 8) return 100;
+    if (hours >= 5 && hours < 6) return 80;
+    if (hours > 8 && hours <= 9) return 80;
+    if (hours >= 4 && hours < 5) return 60;
+    if (hours > 9 && hours <= 10) return 60;
+    return 40;
+  }
+
+  function createGraph() {
+    const data = loadRecords();
+
+    if (!data.length) {
+      document.getElementById('msg').textContent =
+        "まだデータがありません。記録するとグラフが表示されます。";
+      return;
     }
 
-    function createGraph() {
-      const data = loadRecords();
+    const labels = data.map(r => r.date || "不明");
 
-      // ----- データなし対策 -----
-      if (!data.length) {
-        document.getElementById('msg').textContent = "まだデータがありません。記録するとグラフが表示されます。";
-        return;
-      }
+    const hours = data.map(r =>
+      r.duration && !isNaN(r.duration) ? Number(r.duration) : 0
+    );
 
-      // ----- Safariエラー対策：日付・数値は必ず安全に -----
-      const labels = data.map(r => r.date || "不明");
-      const hours = data.map(r =>
-        r.duration && !isNaN(r.duration)
-          ? Number(r.duration)
-          : 0
-      );
+    const scores = hours.map(h => calcScore(h));
 
-      const ctx = document.getElementById('sleepGraph').getContext('2d');
+    const ctx = document.getElementById('sleepGraph').getContext('2d');
 
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "睡眠スコア",
+            data: scores,
+            borderWidth: 3,
+            tension: 0.3,
+            yAxisID: 'yScore'
+          },
+          {
             label: "睡眠時間（時間）",
             data: hours,
             borderWidth: 2,
-            fill: false,
-            tension: 0.3
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: "睡眠時間（h）" }
+            borderDash: [5,5],
+            tension: 0.3,
+            yAxisID: 'yHour'
+          }
+        ]
+      },
+      options: {
+        scales: {
+          yScore: {
+            position: 'left',
+            min: 0,
+            max: 100,
+            title: {
+              display: true,
+              text: "睡眠スコア"
+            }
+          },
+          yHour: {
+            position: 'right',
+            min: 0,
+            max: 12,
+            grid: {
+              drawOnChartArea: false
+            },
+            title: {
+              display: true,
+              text: "睡眠時間（h）"
             }
           }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
         }
-      });
-    }
+      }
+    });
 
-    createGraph();
-  </script>
+    document.getElementById('msg').textContent =
+      "睡眠スコアは、厚生労働省が推奨する6〜8時間の睡眠を満点（100点）として算出しています。";
+  }
+
+  createGraph();
+</script>
 </body>
 </html>
