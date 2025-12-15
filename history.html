@@ -72,6 +72,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1>睡眠履歴</h1>
 
@@ -108,16 +109,6 @@
       localStorage.setItem('sleepData', JSON.stringify(r));
     }
 
-    // ★ 睡眠スコア計算（厚生労働省：6〜8時間）
-    function calcScore(hours) {
-      if (hours >= 6 && hours <= 8) return 100;
-      if (hours >= 5 && hours < 6) return 80;
-      if (hours > 8 && hours <= 9) return 80;
-      if (hours >= 4 && hours < 5) return 60;
-      if (hours > 9 && hours <= 10) return 60;
-      return 40;
-    }
-
     function render() {
       const rows = loadRecords();
       const tbody = $("tbody");
@@ -135,10 +126,10 @@
 
       rows.forEach((r, i) => {
         const hours = Number(r.duration);
-        const score = !isNaN(hours) ? calcScore(hours) : null;
+        const score = typeof r.score === "number" ? r.score : null;
 
         if (!isNaN(hours)) durations.push(hours);
-        if (score !== null) scores.push(score);
+        if (typeof r.score === "number") scores.push(r.score);
 
         const diaryShort = r.diary
           ? (r.diary.length > 30 ? r.diary.slice(0,30) + '…' : r.diary)
