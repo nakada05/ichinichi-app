@@ -62,6 +62,24 @@
       color: #444;
       text-decoration: none;
     }
+
+    /* トースト */
+    #toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: orange;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: top 0.4s ease;
+      z-index: 9999;
+    }
+    #toast.show {
+      top: 20px;
+    }
   </style>
 </head>
 
@@ -78,7 +96,6 @@
 <input type="time" id="wakeTime">
 
 <p id="sleepDuration">睡眠時間：--時間</p>
-<p id="sleepScore">睡眠スコア：-- 点</p>
 
 <label>睡眠前の行動</label>
 <div class="btn-group" id="actionGroup">
@@ -105,6 +122,7 @@
 
 <a class="back" href="index.html">← ホームに戻る</a>
 
+<div id="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -124,6 +142,7 @@ function calcDuration() {
   return Math.round((end - start) / 36e5 * 10) / 10;
 }
 
+/* 睡眠時間のみ（既存ロジック維持） */
 function calcSleepScore(h) {
   if (h >= 6 && h <= 8) return 60;
   if ((h >= 5 && h < 6) || (h > 8 && h <= 9)) return 40;
@@ -131,11 +150,26 @@ function calcSleepScore(h) {
   return 0;
 }
 
+/* 保存時用：気分＋行動を加味 */
+function calcTotalScore(duration, mood, action) {
+  let score = calcSleepScore(duration);
+
+  if (mood === "良い") score += 30;
+  else if (mood === "普通") score += 20;
+  else if (mood === "悪い") score += 10;
+
+  if (action === "ストレッチ") score += 20;
+  else if (action === "読書") score += 15;
+  else if (action === "なし") score += 10;
+
+  return score;
+}
+
+/* 入力中は睡眠時間のみ表示 */
 function updateView() {
   const h = calcDuration();
   if (!h) return;
   $("sleepDuration").textContent = `睡眠時間：${h}時間`;
-  $("sleepScore").textContent = `睡眠スコア：${calcSleepScore(h)} 点`;
 }
 
 $("sleepTime").addEventListener("change", updateView);
@@ -157,6 +191,13 @@ function setMood(btn, v) {
   mood = v;
 }
 
+function showToast(msg) {
+  const t = $("toast");
+  t.innerHTML = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
 function saveData() {
   const duration = calcDuration();
   if (!duration) {
@@ -164,12 +205,14 @@ function saveData() {
     return;
   }
 
+  const score = calcTotalScore(duration, mood, action);
+
   const entry = {
     date: $("dateInput").value,
     sleepTime: $("sleepTime").value,
     wakeTime: $("wakeTime").value,
     duration,
-    score: calcSleepScore(duration),
+    score,
     action,
     mood,
     diary: $("diary").value
@@ -177,7 +220,12 @@ function saveData() {
 
   records.push(entry);
   localStorage.setItem("sleepData", JSON.stringify(records));
-  location.href = "history.html";
+
+  showToast(`保存しました！<br>今日の睡眠スコア：${score}点`);
+
+  setTimeout(() => {
+    location.href = "history.html";
+  }, 2300);
 }
 </script>
 </body>
