@@ -96,11 +96,15 @@
   <button class="select-btn" onclick="setMood(this,'体調不良')">🤧</button>
 </div>
 
-<label>日記</label>
-<textarea id="diary" rows="4"></textarea>
+<label>日記（任意）</label>
+<textarea id="diary" rows="4" placeholder="今日の感想など"></textarea>
 
-<button id="saveBtn" onclick="saveData()">保存</button>
-<a href="index.html" class="back">← ホームに戻る</a>
+<div class="btn-row">
+  <button id="saveBtn" onclick="saveData()">保存</button>
+</div>
+
+<a class="back" href="index.html">← ホームに戻る</a>
+
 
 <script>
 const $ = id => document.getElementById(id);
